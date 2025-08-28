@@ -1,0 +1,1136 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}Team Collaboration - TourCraft{% endblock %}
+
+{% block extra_head %}
+<style>
+    .team-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+    
+    .team-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .team-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+    
+    .team-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .team-workspace {
+        display: grid;
+        grid-template-columns: 300px 1fr 350px;
+        gap: 20px;
+        height: calc(100vh - 200px);
+    }
+    
+    .team-sidebar {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+    }
+    
+    .team-main {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+    }
+    
+    .team-chat {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .sidebar-section {
+        margin-bottom: 25px;
+    }
+    
+    .sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .team-member {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        transition: background 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .team-member:hover {
+        background: #f8f9fa;
+    }
+    
+    .team-member.online {
+        background: #e8f5e8;
+    }
+    
+    .member-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .member-info {
+        flex: 1;
+    }
+    
+    .member-name {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 2px;
+    }
+    
+    .member-role {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .member-status {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #6c757d;
+    }
+    
+    .member-status.online {
+        background: #28a745;
+    }
+    
+    .project-item {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .project-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .project-item.active {
+        background: #e3f2fd;
+        border-left-color: #2196f3;
+    }
+    
+    .project-name {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .project-progress {
+        width: 100%;
+        height: 4px;
+        background: #e9ecef;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 5px;
+    }
+    
+    .project-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 2px;
+        transition: width 0.3s ease;
+    }
+    
+    .project-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .main-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .main-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .main-actions {
+        display: flex;
+        gap: 15px;
+    }
+    
+    .action-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .task-board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .task-column {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        min-height: 400px;
+    }
+    
+    .column-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .column-title {
+        font-weight: 600;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .task-count {
+        background: #dee2e6;
+        color: #6c757d;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .task-item {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .task-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .task-priority {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+    
+    .priority-high {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .priority-medium {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .priority-low {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+    
+    .task-title {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 8px;
+    }
+    
+    .task-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+    
+    .task-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .task-assignee {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .task-due {
+        color: #dc3545;
+    }
+    
+    .chat-header {
+        padding: 20px;
+        border-bottom: 1px solid #e9ecef;
+        background: #f8f9fa;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .chat-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .chat-subtitle {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background: white;
+    }
+    
+    .message {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 12px;
+    }
+    
+    .message.own {
+        flex-direction: row-reverse;
+    }
+    
+    .message-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+    
+    .message-content {
+        max-width: 70%;
+    }
+    
+    .message.own .message-content {
+        text-align: right;
+    }
+    
+    .message-bubble {
+        background: #f8f9fa;
+        padding: 12px 16px;
+        border-radius: 18px;
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+    
+    .message.own .message-bubble {
+        background: #007bff;
+        color: white;
+    }
+    
+    .message-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .message.own .message-time {
+        text-align: right;
+    }
+    
+    .chat-input {
+        padding: 20px;
+        border-top: 1px solid #e9ecef;
+        background: white;
+        border-radius: 0 0 15px 15px;
+    }
+    
+    .input-group {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .chat-textarea {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 25px;
+        resize: none;
+        font-family: inherit;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+    
+    .chat-textarea:focus {
+        border-color: #007bff;
+    }
+    
+    .send-btn {
+        padding: 12px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .send-btn:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+    }
+    
+    .send-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .file-upload {
+        padding: 8px 12px;
+        background: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+    
+    .file-upload:hover {
+        background: #5a6268;
+    }
+    
+    @media (max-width: 1200px) {
+        .team-workspace {
+            grid-template-columns: 250px 1fr 300px;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .team-workspace {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto auto;
+        }
+        
+        .team-sidebar, .team-chat {
+            height: auto;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .team-container {
+            padding: 15px;
+        }
+        
+        .team-header h1 {
+            font-size: 2rem;
+        }
+        
+        .main-actions {
+            flex-direction: column;
+        }
+        
+        .task-board {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="team-container">
+    <!-- Header -->
+    <div class="team-header">
+        <h1>Team Collaboration</h1>
+        <p>Work together, share ideas, and build amazing tours as a team</p>
+    </div>
+    
+    <!-- Team Workspace -->
+    <div class="team-workspace">
+        <!-- Left Sidebar - Team & Projects -->
+        <div class="team-sidebar">
+            <!-- Team Members -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-users"></i>
+                    Team Members (6)
+                </div>
+                <div class="team-member online">
+                    <div class="member-avatar">JS</div>
+                    <div class="member-info">
+                        <div class="member-name">John Smith</div>
+                        <div class="member-role">Product Manager</div>
+                    </div>
+                    <div class="member-status online"></div>
+                </div>
+                <div class="team-member online">
+                    <div class="member-avatar">MJ</div>
+                    <div class="member-info">
+                        <div class="member-name">Mary Johnson</div>
+                        <div class="member-role">UX Designer</div>
+                    </div>
+                    <div class="member-status online"></div>
+                </div>
+                <div class="team-member">
+                    <div class="member-avatar">DW</div>
+                    <div class="member-info">
+                        <div class="member-name">David Wilson</div>
+                        <div class="member-role">Developer</div>
+                    </div>
+                    <div class="member-status"></div>
+                </div>
+                <div class="team-member online">
+                    <div class="member-avatar">SB</div>
+                    <div class="member-info">
+                        <div class="member-name">Sarah Brown</div>
+                        <div class="member-role">Content Writer</div>
+                    </div>
+                    <div class="member-status online"></div>
+                </div>
+                <div class="team-member">
+                    <div class="member-avatar">ML</div>
+                    <div class="member-info">
+                        <div class="member-name">Mike Lee</div>
+                        <div class="member-role">QA Tester</div>
+                    </div>
+                    <div class="member-status"></div>
+                </div>
+                <div class="team-member online">
+                    <div class="member-avatar">AL</div>
+                    <div class="member-info">
+                        <div class="member-name">Anna Lopez</div>
+                        <div class="member-role">Marketing</div>
+                    </div>
+                    <div class="member-status online"></div>
+                </div>
+            </div>
+            
+            <!-- Active Projects -->
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <i class="fas fa-project-diagram"></i>
+                    Active Projects
+                </div>
+                <div class="project-item active">
+                    <div class="project-name">Product Onboarding Tour</div>
+                    <div class="project-progress">
+                        <div class="project-progress-fill" style="width: 75%"></div>
+                    </div>
+                    <div class="project-stats">
+                        <span>75% Complete</span>
+                        <span>3 days left</span>
+                    </div>
+                </div>
+                <div class="project-item">
+                    <div class="project-name">Training Module Redesign</div>
+                    <div class="project-progress">
+                        <div class="project-progress-fill" style="width: 45%"></div>
+                    </div>
+                    <div class="project-stats">
+                        <span>45% Complete</span>
+                        <span>1 week left</span>
+                    </div>
+                </div>
+                <div class="project-item">
+                    <div class="project-name">Mobile App Tour</div>
+                    <div class="project-progress">
+                        <div class="project-progress-fill" style="width: 20%"></div>
+                    </div>
+                    <div class="project-stats">
+                        <span>20% Complete</span>
+                        <span>2 weeks left</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content - Task Board -->
+        <div class="team-main">
+            <div class="main-header">
+                <h2 class="main-title">Task Board</h2>
+                <div class="main-actions">
+                    <button class="action-btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        New Task
+                    </button>
+                    <button class="action-btn btn-secondary">
+                        <i class="fas fa-filter"></i>
+                        Filter
+                    </button>
+                    <button class="action-btn btn-success">
+                        <i class="fas fa-download"></i>
+                        Export
+                    </button>
+                </div>
+            </div>
+            
+            <div class="task-board">
+                <!-- To Do Column -->
+                <div class="task-column">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <i class="fas fa-list-ul"></i>
+                            To Do
+                        </div>
+                        <div class="task-count">4</div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-high">High</div>
+                        <div class="task-title">Review onboarding tour content</div>
+                        <div class="task-description">Check grammar, clarity, and flow of the onboarding tour steps</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                Sarah Brown
+                            </div>
+                            <div class="task-due">Due Today</div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-medium">Medium</div>
+                        <div class="task-title">Update tour screenshots</div>
+                        <div class="task-description">Capture new screenshots for the updated interface</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                Mary Johnson
+                            </div>
+                            <div class="task-due">Due Tomorrow</div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-low">Low</div>
+                        <div class="task-title">Research competitor tours</div>
+                        <div class="task-description">Analyze competitor product tours for inspiration</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                Anna Lopez
+                            </div>
+                            <div class="task-due">Due Friday</div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-medium">Medium</div>
+                        <div class="task-title">Test mobile responsiveness</div>
+                        <div class="task-description">Ensure all tours work properly on mobile devices</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                Mike Lee
+                            </div>
+                            <div class="task-due">Due Monday</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- In Progress Column -->
+                <div class="task-column">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <i class="fas fa-spinner"></i>
+                            In Progress
+                        </div>
+                        <div class="task-count">3</div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-high">High</div>
+                        <div class="task-title">Design new tour templates</div>
+                        <div class="task-description">Create modern, engaging tour template designs</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                Mary Johnson
+                            </div>
+                            <div class="task-due">Due Wednesday</div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-medium">Medium</div>
+                        <div class="task-title">Implement analytics tracking</div>
+                        <div class="task-description">Add comprehensive analytics to track tour performance</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                David Wilson
+                            </div>
+                            <div class="task-due">Due Friday</div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-low">Low</div>
+                        <div class="task-title">Update documentation</div>
+                        <div class="task-description">Update user and developer documentation</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                John Smith
+                            </div>
+                            <div class="task-due">Due Next Week</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Review Column -->
+                <div class="task-column">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <i class="fas fa-search"></i>
+                            Review
+                        </div>
+                        <div class="task-count">2</div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-medium">Medium</div>
+                        <div class="task-title">Code review for new features</div>
+                        <div class="task-description">Review the new tour creation features</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                David Wilson
+                            </div>
+                            <div class="task-due">Due Today</div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-low">Low</div>
+                        <div class="task-title">Content review</div>
+                        <div class="task-description">Review all tour content for accuracy</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                John Smith
+                            </div>
+                            <div class="task-due">Due Tomorrow</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Done Column -->
+                <div class="task-column">
+                    <div class="column-header">
+                        <div class="column-title">
+                            <i class="fas fa-check-circle"></i>
+                            Done
+                        </div>
+                        <div class="task-count">5</div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-high">High</div>
+                        <div class="task-title">Setup project structure</div>
+                        <div class="task-description">Initialize the project with proper structure</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                David Wilson
+                            </div>
+                            <div class="task-due">Completed</div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-medium">Medium</div>
+                        <div class="task-title">Create basic tour editor</div>
+                        <div class="task-description">Build the core tour editing functionality</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                David Wilson
+                            </div>
+                            <div class="task-due">Completed</div>
+                        </div>
+                    </div>
+                    
+                    <div class="task-item">
+                        <div class="task-priority priority-low">Low</div>
+                        <div class="task-title">Setup version control</div>
+                        <div class="task-description">Initialize Git repository and branching strategy</div>
+                        <div class="task-meta">
+                            <div class="task-assignee">
+                                <i class="fas fa-user"></i>
+                                John Smith
+                            </div>
+                            <div class="task-due">Completed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Sidebar - Team Chat -->
+        <div class="team-chat">
+            <div class="chat-header">
+                <div class="chat-title">Team Chat</div>
+                <div class="chat-subtitle">6 members online</div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message">
+                    <div class="message-avatar">JS</div>
+                    <div class="message-content">
+                        <div class="message-bubble">Hey team! How's the onboarding tour coming along?</div>
+                        <div class="message-time">10:30 AM</div>
+                    </div>
+                </div>
+                
+                <div class="message own">
+                    <div class="message-avatar">MJ</div>
+                    <div class="message-content">
+                        <div class="message-bubble">Great progress! I've finished the design mockups. Should we review them together?</div>
+                        <div class="message-time">10:32 AM</div>
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-avatar">DW</div>
+                    <div class="message-content">
+                        <div class="message-bubble">Perfect timing! I just finished implementing the new tour editor. Ready for testing.</div>
+                        <div class="message-time">10:35 AM</div>
+                    </div>
+                </div>
+                
+                <div class="message own">
+                    <div class="message-avatar">SB</div>
+                    <div class="message-content">
+                        <div class="message-bubble">I've written the content for the first 3 steps. Can someone review it?</div>
+                        <div class="message-time">10:37 AM</div>
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-avatar">JS</div>
+                    <div class="message-content">
+                        <div class="message-bubble">Let's schedule a review meeting for tomorrow at 2 PM. Everyone available?</div>
+                        <div class="message-time">10:40 AM</div>
+                    </div>
+                </div>
+                
+                <div class="message own">
+                    <div class="message-avatar">AL</div>
+                    <div class="message-content">
+                        <div class="message-bubble">I'm in! Should I prepare the marketing materials for the launch?</div>
+                        <div class="message-time">10:42 AM</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <div class="input-group">
+                    <button class="file-upload">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <textarea class="chat-textarea" id="chatInput" placeholder="Type your message..." rows="2"></textarea>
+                    <button class="send-btn" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+class TeamCollaboration {
+    constructor() {
+        this.chatInput = document.getElementById('chatInput');
+        this.sendBtn = document.getElementById('sendBtn');
+        this.chatMessages = document.getElementById('chatMessages');
+        this.currentUser = 'MJ'; // Current user avatar
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.setupTaskDragAndDrop();
+        this.autoScrollChat();
+    }
+    
+    setupEventListeners() {
+        // Send message on Enter key
+        this.chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                this.sendMessage();
+            }
+        });
+        
+        // Send message on button click
+        this.sendBtn.addEventListener('click', () => {
+            this.sendMessage();
+        });
+        
+        // File upload
+        document.querySelector('.file-upload').addEventListener('click', () => {
+            this.uploadFile();
+        });
+        
+        // Task item clicks
+        document.querySelectorAll('.task-item').forEach(task => {
+            task.addEventListener('click', () => {
+                this.selectTask(task);
+            });
+        });
+        
+        // Project item clicks
+        document.querySelectorAll('.project-item').forEach(project => {
+            project.addEventListener('click', () => {
+                this.selectProject(project);
+            });
+        });
+    }
+    
+    sendMessage() {
+        const message = this.chatInput.value.trim();
+        if (!message) return;
+        
+        const messageElement = this.createMessageElement(message, true);
+        this.chatMessages.appendChild(messageElement);
+        
+        // Clear input
+        this.chatInput.value = '';
+        
+        // Auto-scroll to bottom
+        this.autoScrollChat();
+        
+        // Simulate response after 2 seconds
+        setTimeout(() => {
+            this.simulateResponse();
+        }, 2000);
+    }
+    
+    createMessageElement(text, isOwn = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isOwn ? 'own' : ''}`;
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        avatar.textContent = isOwn ? this.currentUser : 'JS';
+        
+        const content = document.createElement('div');
+        content.className = 'message-content';
+        
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        bubble.textContent = text;
+        
+        const time = document.createElement('div');
+        time.className = 'message-time';
+        time.textContent = new Date().toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit' 
+        });
+        
+        content.appendChild(bubble);
+        content.appendChild(time);
+        
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(content);
+        
+        return messageDiv;
+    }
+    
+    simulateResponse() {
+        const responses = [
+            "Thanks for the update!",
+            "Great work everyone!",
+            "I'll review this by EOD",
+            "Perfect timing!",
+            "Let me know if you need help with anything"
+        ];
+        
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        const messageElement = this.createMessageElement(randomResponse, false);
+        this.chatMessages.appendChild(messageElement);
+        
+        this.autoScrollChat();
+    }
+    
+    uploadFile() {
+        // Simulate file upload
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*,.pdf,.doc,.docx';
+        
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const messageElement = this.createMessageElement(`📎 ${file.name} uploaded`, true);
+                this.chatMessages.appendChild(messageElement);
+                this.autoScrollChat();
+            }
+        };
+        
+        input.click();
+    }
+    
+    selectTask(task) {
+        // Remove active class from all tasks
+        document.querySelectorAll('.task-item').forEach(t => t.classList.remove('active'));
+        
+        // Add active class to selected task
+        task.classList.add('active');
+        
+        // Here you would typically show task details or open a modal
+        console.log('Selected task:', task.querySelector('.task-title').textContent);
+    }
+    
+    selectProject(project) {
+        // Remove active class from all projects
+        document.querySelectorAll('.project-item').forEach(p => p.classList.remove('active'));
+        
+        // Add active class to selected project
+        project.classList.add('active');
+        
+        // Here you would typically filter tasks by project
+        console.log('Selected project:', project.querySelector('.project-name').textContent);
+    }
+    
+    setupTaskDragAndDrop() {
+        // Basic drag and drop functionality for tasks
+        const taskItems = document.querySelectorAll('.task-item');
+        const columns = document.querySelectorAll('.task-column');
+        
+        taskItems.forEach(task => {
+            task.draggable = true;
+            
+            task.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', task.querySelector('.task-title').textContent);
+                task.style.opacity = '0.5';
+            });
+            
+            task.addEventListener('dragend', () => {
+                task.style.opacity = '1';
+            });
+        });
+        
+        columns.forEach(column => {
+            column.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                column.style.backgroundColor = '#e3f2fd';
+            });
+            
+            column.addEventListener('dragleave', () => {
+                column.style.backgroundColor = '#f8f9fa';
+            });
+            
+            column.addEventListener('drop', (e) => {
+                e.preventDefault();
+                column.style.backgroundColor = '#f8f9fa';
+                
+                // Here you would typically update the task status in the backend
+                console.log('Task moved to:', column.querySelector('.column-title').textContent);
+            });
+        });
+    }
+    
+    autoScrollChat() {
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+    }
+}
+
+// Initialize team collaboration when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    window.teamCollaboration = new TeamCollaboration();
+});
+</script>
+{% endblock %}

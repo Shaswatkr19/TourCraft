@@ -1,0 +1,69 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<header class="bg-white shadow p-4">
+    <h1 class="text-2xl font-bold text-gray-800">Tour Templates</h1>
+    <p class="text-gray-500 mt-1">View and manage your tour templates</p>
+</header>
+
+<main class="p-6 space-y-6">
+    <!-- Template Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg shadow p-5">
+            <h2 class="text-gray-600 font-semibold">Total Templates</h2>
+            <p class="text-3xl font-bold text-blue-600">{{ template_data.total_templates }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-5">
+            <h2 class="text-gray-600 font-semibold">Public Templates</h2>
+            <p class="text-3xl font-bold text-green-600">{{ template_data.public_templates }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-5">
+            <h2 class="text-gray-600 font-semibold">Private Templates</h2>
+            <p class="text-3xl font-bold text-purple-600">{{ template_data.private_templates }}</p>
+        </div>
+    </div>
+
+    <!-- Template Categories -->
+    <section class="bg-white rounded-lg shadow p-5">
+        <h2 class="text-gray-700 font-semibold text-lg mb-4">Categories</h2>
+        <div class="flex flex-wrap gap-3">
+            {% for category in template_data.categories %}
+            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">{{ category }}</span>
+            {% empty %}
+            <span class="text-gray-500">No categories available.</span>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- User Templates List -->
+    <section class="bg-white rounded-lg shadow p-5">
+        <h2 class="text-gray-700 font-semibold text-lg mb-4">Your Templates</h2>
+        <ul class="divide-y divide-gray-200">
+            {% for tour in template_data.user_templates %}
+            <li class="py-2 flex justify-between items-center">
+                <span>{{ tour.title }}</span>
+                <span class="text-gray-500">{{ tour.status }}</span>
+            </li>
+            {% empty %}
+            <li class="py-2 text-gray-500">No templates created yet.</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <!-- Featured Templates -->
+    <section class="bg-white rounded-lg shadow p-5">
+        <h2 class="text-gray-700 font-semibold text-lg mb-4">Featured Templates</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {% for template in template_data.featured_templates %}
+            <div class="bg-gray-50 rounded p-3 shadow-sm">
+                <h3 class="font-semibold text-gray-700">{{ template.title }}</h3>
+                <p class="text-gray-500 text-sm">{{ template.description }}</p>
+            </div>
+            {% empty %}
+            <p class="text-gray-500">No featured templates at the moment.</p>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

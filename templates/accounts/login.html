@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - TourCraft</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Animated gradient background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg at 50% 50%, 
+                rgba(99, 102, 241, 0.1) 0deg,
+                rgba(139, 92, 246, 0.1) 60deg,
+                rgba(168, 85, 247, 0.1) 120deg,
+                rgba(219, 39, 119, 0.1) 180deg,
+                rgba(244, 63, 94, 0.1) 240deg,
+                rgba(99, 102, 241, 0.1) 300deg,
+                rgba(99, 102, 241, 0.1) 360deg);
+            animation: rotate 20s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Subtle grain texture */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+            z-index: -1;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 3.5rem 3rem;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 
+                0 32px 64px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Subtle inner glow */
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent,
+                rgba(99, 102, 241, 0.6),
+                rgba(168, 85, 247, 0.6),
+                rgba(219, 39, 119, 0.6),
+                transparent
+            );
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .logo h1 {
+            background: linear-gradient(135deg, 
+                #ffffff 0%,
+                rgba(255, 255, 255, 0.9) 50%,
+                rgba(255, 255, 255, 0.7) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            font-size: 2.75rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.5rem;
+            line-height: 1.1;
+        }
+        
+        .logo p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.6;
+            letter-spacing: -0.01em;
+        }
+        
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.875rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            font-size: 0.925rem;
+            letter-spacing: -0.01em;
+        }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 1rem 1.125rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: 400;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            backdrop-filter: blur(8px);
+        }
+        
+        input[type="text"]:focus, input[type="password"]:focus {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 
+                0 0 0 3px rgba(99, 102, 241, 0.1),
+                0 8px 32px rgba(99, 102, 241, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        input[type="text"]:hover, input[type="password"]:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 400;
+        }
+        
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, 
+                rgba(99, 102, 241, 1) 0%,
+                rgba(139, 92, 246, 1) 50%,
+                rgba(168, 85, 247, 1) 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.025rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: -0.01em;
+            box-shadow: 
+                0 8px 32px rgba(99, 102, 241, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 16px 48px rgba(99, 102, 241, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        
+        .login-btn:hover::before {
+            opacity: 1;
+        }
+        
+        .login-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: rgba(248, 113, 113, 0.95);
+            padding: 1rem 1.125rem;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            font-size: 0.925rem;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+        }
+        
+        .links {
+            text-align: center;
+            margin-top: 2.5rem;
+            padding-top: 2.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.925rem;
+            margin: 0 1.25rem;
+            transition: all 0.3s ease;
+            letter-spacing: -0.01em;
+            position: relative;
+        }
+        
+        .links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 50%;
+            background: linear-gradient(90deg, 
+                rgba(99, 102, 241, 1),
+                rgba(168, 85, 247, 1));
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .links a:hover {
+            color: rgba(255, 255, 255, 0.95);
+        }
+        
+        .links a:hover::after {
+            width: 100%;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 520px) {
+            .login-container {
+                padding: 2.5rem 1.75rem;
+                margin: 1rem;
+                border-radius: 20px;
+            }
+            
+            .logo h1 {
+                font-size: 2.25rem;
+            }
+            
+            .links a {
+                display: block;
+                margin: 0.75rem 0;
+            }
+        }
+        
+        /* Focus ring for accessibility */
+        input:focus-visible,
+        button:focus-visible {
+            outline: 2px solid rgba(99, 102, 241, 0.6);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>TourCraft</h1>
+            <p>Sign in to access your workspace</p>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Email</label>
+                <input type="text" id="username" name="username" placeholder="Enter your email address" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="login-btn">Continue</button>
+        </form>
+        
+        <div class="links">
+            <a href="#">Forgot password?</a>
+            <a href="#">Create account</a>
+        </div>
+    </div>
+</body>
+</html>

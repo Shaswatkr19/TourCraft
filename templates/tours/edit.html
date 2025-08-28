@@ -1,0 +1,54 @@
+<!-- accounts/templates/accounts/edit.html -->
+
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Edit Tour{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Edit Tour</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="{% url 'tours:edit' tour.id %}">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="title" class="form-label">Tour Title</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ tour.title }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="4">{{ tour.description }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status">
+                <option value="Draft" {% if tour.status == 'Draft' %}selected{% endif %}>Draft</option>
+                <option value="Published" {% if tour.status == 'Published' %}selected{% endif %}>Published</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="privacy" class="form-label">Privacy</label>
+            <select class="form-select" id="privacy" name="privacy">
+                <option value="private" {% if tour.privacy == 'private' %}selected{% endif %}>Private</option>
+                <option value="public" {% if tour.privacy == 'public' %}selected{% endif %}>Public</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success">Update Tour</button>
+        <a href="{% url 'accounts:list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

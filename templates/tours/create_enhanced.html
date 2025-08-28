@@ -1,0 +1,476 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Create Interactive Tour - TourCraft{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/tour-editor.css' %}">
+<style>
+/* Hero Section */
+.landing-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 5rem 0;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+.landing-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+.landing-hero .container {
+    position: relative;
+    z-index: 2;
+}
+.landing-hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(45deg, #ffffff, #f0f9ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+}
+.landing-hero .subtitle {
+    font-size: 1.4rem;
+    opacity: 0.95;
+    max-width: 700px;
+    margin: 0 auto 1rem;
+    font-weight: 300;
+    line-height: 1.6;
+}
+.landing-hero .highlight {
+    font-size: 1.1rem;
+    opacity: 0.85;
+    margin-bottom: 2.5rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+.hero-cta-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+.hero-cta-button {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 1.2rem 3rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    box-shadow: 0 8px 25px rgba(16,185,129,0.3);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.hero-cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+.hero-cta-button:hover::before {
+    left: 100%;
+}
+.hero-cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(16,185,129,0.4);
+    color: white;
+}
+.hero-cta-button:active {
+    transform: translateY(-1px);
+}
+.trust-indicators {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+.trust-item i {
+    color: #10b981;
+}
+
+/* Feature Grid */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin: 4rem 0;
+}
+.feature-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+}
+.feature-icon {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: white;
+    font-size: 1.8rem;
+    box-shadow: 0 8px 25px rgba(59,130,246,0.3);
+}
+.feature-card h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1f2937;
+}
+.feature-card p {
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+/* CTA Section */
+.cta-section {
+    text-align: center;
+    padding: 4rem 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 20px;
+    margin: 3rem 0;
+    position: relative;
+}
+.cta-section h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #1f2937;
+}
+.cta-section .lead {
+    font-size: 1.3rem;
+    color: #4b5563;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.final-cta-button {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    padding: 1.3rem 3.5rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.3rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    box-shadow: 0 10px 30px rgba(139,92,246,0.3);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.final-cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+.final-cta-button:hover::before {
+    left: 100%;
+}
+.final-cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(139,92,246,0.4);
+    color: white;
+}
+.cta-features {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+.cta-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    color: #6b7280;
+}
+.cta-feature i {
+    color: #10b981;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .landing-hero h1 {
+        font-size: 2.5rem;
+    }
+    .landing-hero .subtitle {
+        font-size: 1.2rem;
+    }
+    .hero-cta-button,
+    .final-cta-button {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+    .trust-indicators {
+        gap: 1rem;
+    }
+    .trust-item {
+        font-size: 0.8rem;
+    }
+    .cta-features {
+        gap: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="landing-hero">
+    <div class="container">
+        <h1>Create Interactive Product Tours That Convert</h1>
+        <p class="subtitle">Transform complex workflows into engaging step-by-step guides with screen recordings, smart highlights, and seamless animations. Boost user adoption and reduce support tickets.</p>
+        <div class="highlight">
+            <i class="fas fa-sparkles"></i>
+            No coding required • Ready in minutes • Used by 10,000+ creators
+        </div>
+        <div class="hero-cta-container">
+            <button class="hero-cta-button" onclick="startTourCreation()">
+                🚀 Start Creating Free Tours
+            </button>
+            <div class="trust-indicators">
+                <div class="trust-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Free forever plan</span>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>No credit card needed</span>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Setup in 2 minutes</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Feature Overview -->
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-video"></i></div>
+            <h3>One-Click Screen Recording</h3>
+            <p>Capture your entire workflow directly in the browser with our intelligent screen recorder. No downloads, no hassle—just click and create.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-mouse-pointer"></i></div>
+            <h3>Visual Drag & Drop Editor</h3>
+            <p>Intuitive editor for creating tour steps. Add highlights, annotations, and interactive elements with simple drag-and-drop functionality.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-share-alt"></i></div>
+            <h3>Instant Sharing & Embedding</h3>
+            <p>Generate shareable links in seconds or embed tours directly into your website. Perfect for customer onboarding and product demos.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+            <h3>Real-Time Analytics</h3>
+            <p>Track user engagement, completion rates, and drop-off points. Get actionable insights to optimize your tours for better results.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-paint-brush"></i></div>
+            <h3>Brand Customization</h3>
+            <p>Match your brand perfectly with custom logos, colors, fonts, and themes. Create consistent experiences across all your tours.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon"><i class="fas fa-hand-pointer"></i></div>
+            <h3>Interactive Hotspots</h3>
+            <p>Add clickable elements, quizzes, forms, and tooltips to create engaging, interactive experiences that drive user action.</p>
+        </div>
+    </div>
+
+    <!-- Tour Creation Form -->
+    <div id="tourCreationForm" style="display: none;">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header"><h4>Tour Details</h4></div>
+                    <div class="card-body">
+                        <form id="basicTourForm">
+                            <div class="mb-3">
+                                <label for="tourTitle" class="form-label">Tour Title</label>
+                                <input type="text" class="form-control" id="tourTitle" name="title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tourDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="tourDescription" name="description" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tourPrivacy" class="form-label">Privacy</label>
+                                <select class="form-select" id="tourPrivacy" name="privacy">
+                                    <option value="private">Private</option>
+                                    <option value="public">Public</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Create Tour & Open Editor</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header"><h4>Quick Start Guide</h4></div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>1. Basic Setup</h5>
+                                <ul class="list-unstyled">
+                                    <li>✓ Enter tour title and description</li>
+                                    <li>✓ Choose privacy settings</li>
+                                    <li>✓ Click create to open editor</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>2. Build Your Tour</h5>
+                                <ul class="list-unstyled">
+                                    <li>✓ Add tour steps</li>
+                                    <li>✓ Upload screenshots</li>
+                                    <li>✓ Record screen actions</li>
+                                    <li>✓ Add highlights & annotations</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mt-3 p-3 bg-light rounded">
+                            <h6>💡 Pro Tips:</h6>
+                            <ul class="mb-0">
+                                <li>Keep steps short and focused on one action</li>
+                                <li>Use clear, descriptive titles for each step</li>
+                                <li>Add highlights to draw attention to important areas</li>
+                                <li>Test your tour before sharing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual Tour Editor -->
+    <div id="tourEditorContainer" style="display: none;" data-tour-id="new"></div>
+</div>
+
+<!-- Call to Action -->
+<div class="cta-section">
+    <div class="container">
+        <h2>Ready to Transform Your User Experience?</h2>
+        <p class="lead">Join 10,000+ creators who've already built amazing interactive tours. Start free, upgrade when you're ready.</p>
+        <button class="final-cta-button" onclick="startTourCreation()">
+            ⚡ Create Your First Tour Now
+        </button>
+        <div class="cta-features">
+            <div class="cta-feature">
+                <i class="fas fa-infinity"></i>
+                <span>Unlimited tours on free plan</span>
+            </div>
+            <div class="cta-feature">
+                <i class="fas fa-clock"></i>
+                <span>2-minute setup</span>
+            </div>
+            <div class="cta-feature">
+                <i class="fas fa-users"></i>
+                <span>Team collaboration</span>
+            </div>
+            <div class="cta-feature">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Mobile responsive</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/screen-recorder.js' %}"></script>
+<script src="{% static 'js/tour-editor.js' %}"></script>
+<script>
+function startTourCreation() {
+    const form = document.getElementById('tourCreationForm');
+    const editor = document.getElementById('tourEditorContainer');
+
+    if (form.style.display === 'none') {
+        form.style.display = 'block';
+        form.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        form.style.display = 'none';
+        editor.style.display = 'block';
+        editor.scrollIntoView({ behavior: 'smooth' });
+        if (window.tourEditor) window.tourEditor.init();
+    }
+}
+
+document.getElementById('basicTourForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const tourData = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        privacy: formData.get('privacy'),
+        created_at: new Date().toISOString()
+    };
+    localStorage.setItem('current_tour', JSON.stringify(tourData));
+    startTourCreation();
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (!document.querySelector('link[href*="font-awesome"]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+        document.head.appendChild(link);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% block title %}Interactive Preview - {{ tour.title }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/tour-editor.css' %}">
+<style>
+/* Preview container */
+.preview-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* Header */
+.preview-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.preview-header h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 700; }
+.preview-header p { font-size: 1.1rem; opacity: 0.9; }
+
+/* Step Navigation */
+.step-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.step-info { text-align: center; flex: 1; }
+.step-counter { font-size: 1.2rem; color: #6c757d; margin-bottom: 5px; }
+.step-title { font-size: 1.5rem; font-weight: 600; color: #333; }
+.navigation-controls { display: flex; gap: 15px; align-items: center; }
+.nav-btn { padding: 12px 24px; border: none; border-radius: 25px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+.nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-prev { background: #6c757d; color: white; }
+.btn-next { background: #007bff; color: white; }
+.btn-play { background: #28a745; color: white; }
+.btn-pause { background: #ffc107; color: #212529; }
+.btn-stop { background: #dc3545; color: white; }
+.nav-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+
+/* Step content */
+.step-content { background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-height: 400px; position: relative; overflow: hidden; }
+.step-screenshot { width: 100%; max-width: 800px; height: auto; border-radius: 10px; margin: 0 auto 20px; display: block; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.step-description { font-size: 1.1rem; line-height: 1.6; color: #555; margin-bottom: 20px; }
+
+/* Highlight overlay */
+.highlight-overlay { position: absolute; border: 3px solid #ff6b6b; background: rgba(255,107,107,0.1); border-radius: 5px; pointer-events: none; animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,107,107,0.7); } 70% { box-shadow: 0 0 0 10px rgba(255,107,107,0); } 100% { box-shadow: 0 0 0 0 rgba(255,107,107,0); } }
+
+/* Progress bar */
+.progress-container { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.progress-bar { width: 100%; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden; margin-bottom: 15px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); border-radius: 4px; transition: width 0.5s ease; }
+.progress-text { text-align: center; color: #6c757d; font-weight: 500; }
+
+/* Saved files section */
+.saved-files { background: white; border-radius: 15px; padding: 20px; margin-top: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.saved-files h3 { margin-bottom: 15px; color: #333; font-weight: 600; }
+.saved-file-item { padding: 10px 15px; border-radius: 8px; margin-bottom: 8px; cursor: pointer; border-left: 4px solid transparent; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; }
+.saved-file-item:hover { background: #f8f9fa; }
+.saved-file-item-name { font-weight: 500; color: #333; }
+.saved-file-item a { text-decoration: none; color: #007bff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="preview-container">
+
+    <!-- Header -->
+    <div class="preview-header">
+        <h1>{{ tour.title }}</h1>
+        <p>{{ tour.description|default:"Interactive tour preview with step-by-step navigation" }}</p>
+    </div>
+
+    <!-- Step Navigation -->
+    <div class="step-navigation">
+        <div class="step-info">
+            <div class="step-counter">Step <span id="currentStepNumber">1</span> of <span id="totalSteps">{{ steps|length }}</span></div>
+            <div class="step-title" id="currentStepTitle">Loading...</div>
+        </div>
+        <div class="navigation-controls">
+            <button class="nav-btn btn-prev" id="prevBtn" onclick="tourPlayer.previousStep()">Previous</button>
+            <button class="nav-btn btn-play" id="playBtn" onclick="tourPlayer.togglePlayPause()">Play</button>
+            <button class="nav-btn btn-stop" id="stopBtn" onclick="tourPlayer.stopTour()">Stop</button>
+            <button class="nav-btn btn-next" id="nextBtn" onclick="tourPlayer.nextStep()">Next</button>
+        </div>
+    </div>
+
+    <!-- Step Content -->
+    <div class="step-content" id="stepContent">
+        <div class="text-center text-muted">
+            <i class="fas fa-spinner fa-spin fa-3x"></i>
+            <p class="mt-3">Loading tour content...</p>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <div class="progress-text" id="progressText">0% Complete</div>
+    </div>
+
+    <!-- Saved Files Section -->
+    <div class="saved-files" id="savedFilesSection">
+        <h3>Saved Files</h3>
+        <div id="savedFilesList">
+            {% for file in saved_files %}
+            <div class="saved-file-item">
+                <span class="saved-file-item-name">{{ file.name }}</span>
+                <a href="{{ file.url }}" target="_blank">Download</a>
+            </div>
+            {% empty %}
+            <p>No saved files found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Placeholder: steps JSON from backend
+let tourPlayer;
+document.addEventListener('DOMContentLoaded', function() {
+    const steps = {{ steps|safe }};
+    if (steps && steps.length > 0) {
+        tourPlayer = new EnhancedTourPlayer(steps, 'stepContent');
+    } else {
+        document.getElementById('stepContent').innerHTML = '<div class="text-center text-muted"><p>No steps found in this tour.</p></div>';
+    }
+});
+
+// Optional: AJAX fetch for saved files (demo)
+function fetchSavedFiles() {
+    fetch("{% url 'tours:saved_files_api' tour.id %}")
+    .then(res => res.json())
+    .then(data => {
+        const list = document.getElementById('savedFilesList');
+        list.innerHTML = '';
+        if (data.files && data.files.length > 0) {
+            data.files.forEach(f => {
+                const div = document.createElement('div');
+                div.className = 'saved-file-item';
+                div.innerHTML = `<span class="saved-file-item-name">${f.name}</span> <a href="${f.url}" target="_blank">Download</a>`;
+                list.appendChild(div);
+            });
+        } else {
+            list.innerHTML = '<p>No saved files found.</p>';
+        }
+    });
+}
+
+// Call fetchSavedFiles() if you want auto-refresh
+// fetchSavedFiles();
+</script>
+{% endblock %}

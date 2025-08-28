@@ -1,0 +1,77 @@
+<!-- accounts/profile.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header class="bg-white shadow p-4">
+        <h1 class="text-2xl font-bold text-gray-800">User Profile</h1>
+        <p class="text-gray-500 mt-1">Manage your profile and see activity summary</p>
+    </header>
+
+    <main class="p-6 space-y-6">
+        <!-- Profile Info -->
+        <section class="bg-white rounded-lg shadow p-5">
+            <h2 class="text-gray-700 font-semibold text-lg mb-4">Profile Information</h2>
+            <form method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-gray-600">First Name</label>
+                    <input type="text" name="first_name" value="{{ profile_data.user.first_name }}" class="mt-1 block w-full p-2 border rounded" />
+                </div>
+                <div>
+                    <label class="block text-gray-600">Last Name</label>
+                    <input type="text" name="last_name" value="{{ profile_data.user.last_name }}" class="mt-1 block w-full p-2 border rounded" />
+                </div>
+                <div>
+                    <label class="block text-gray-600">Email</label>
+                    <input type="email" name="email" value="{{ profile_data.user.email }}" class="mt-1 block w-full p-2 border rounded" />
+                </div>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Update Profile</button>
+            </form>
+        </section>
+
+        <!-- Profile Stats -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-lg shadow p-5">
+                <h2 class="text-gray-600 font-semibold">Tours Created</h2>
+                <p class="text-3xl font-bold text-blue-600">{{ profile_data.tours_created }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-5">
+                <h2 class="text-gray-600 font-semibold">Total Views</h2>
+                <p class="text-3xl font-bold text-green-600">{{ profile_data.total_views }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-5">
+                <h2 class="text-gray-600 font-semibold">Published Tours</h2>
+                <p class="text-3xl font-bold text-purple-600">{{ profile_data.published_tours }}</p>
+            </div>
+        </section>
+
+        <!-- Recent Tours -->
+        <section class="bg-white rounded-lg shadow p-5">
+            <h2 class="text-gray-700 font-semibold text-lg mb-4">Recent Tours</h2>
+            <ul class="divide-y divide-gray-200">
+                {% for tour in profile_data.recent_tours %}
+                <li class="py-2 flex justify-between items-center">
+                    <span>{{ tour.title }}</span>
+                    <span class="text-gray-500">{{ tour.status }}</span>
+                </li>
+                {% empty %}
+                <li class="py-2 text-gray-500">No recent tours available.</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <!-- Member Since -->
+        <section class="bg-white rounded-lg shadow p-5">
+            <h2 class="text-gray-700 font-semibold text-lg mb-4">Account Info</h2>
+            <p class="text-gray-600">Member since: <strong>{{ profile_data.member_since|date:"M d, Y" }}</strong></p>
+        </section>
+    </main>
+</body>
+</html>

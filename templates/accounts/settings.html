@@ -1,0 +1,64 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<header class="bg-white shadow p-4">
+    <h1 class="text-2xl font-bold text-gray-800">Account Settings</h1>
+    <p class="text-gray-500 mt-1">Manage your profile, preferences, and account details</p>
+</header>
+
+<main class="p-6 space-y-6">
+    <!-- User Profile Settings -->
+    <section class="bg-white rounded-lg shadow p-5">
+        <h2 class="text-gray-700 font-semibold text-lg mb-4">Profile Information</h2>
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-gray-600">First Name</label>
+                <input type="text" name="first_name" value="{{ settings_data.user.first_name }}" class="mt-1 block w-full p-2 border rounded" />
+            </div>
+            <div>
+                <label class="block text-gray-600">Last Name</label>
+                <input type="text" name="last_name" value="{{ settings_data.user.last_name }}" class="mt-1 block w-full p-2 border rounded" />
+            </div>
+            <div>
+                <label class="block text-gray-600">Email</label>
+                <input type="email" name="email" value="{{ settings_data.user.email }}" class="mt-1 block w-full p-2 border rounded" />
+            </div>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save Changes</button>
+        </form>
+    </section>
+
+    <!-- Account Preferences -->
+    <section class="bg-white rounded-lg shadow p-5">
+        <h2 class="text-gray-700 font-semibold text-lg mb-4">Account Preferences</h2>
+        <ul class="space-y-2">
+            <li>Email Notifications: <strong>{{ settings_data.account_settings.email_notifications|yesno:"Enabled,Disabled" }}</strong></li>
+            <li>Marketing Emails: <strong>{{ settings_data.account_settings.marketing_emails|yesno:"Enabled,Disabled" }}</strong></li>
+            <li>Tour Analytics: <strong>{{ settings_data.account_settings.tour_analytics|yesno:"Enabled,Disabled" }}</strong></li>
+        </ul>
+    </section>
+
+    <!-- API Settings -->
+    <section class="bg-white rounded-lg shadow p-5">
+        <h2 class="text-gray-700 font-semibold text-lg mb-4">API Settings</h2>
+        <p class="text-gray-600 mb-2">
+            Your API Key: 
+            <code class="bg-gray-100 px-2 py-1 rounded">{{ settings_data.api_settings.api_key }}</code>
+        </p>
+        <p class="text-gray-600">
+            Webhook URL: 
+            <span>{{ settings_data.api_settings.webhook_url|default:"Not set" }}</span>
+        </p>
+    </section>
+
+    <!-- Billing Information -->
+    <section class="bg-white rounded-lg shadow p-5">
+        <h2 class="text-gray-700 font-semibold text-lg mb-4">Billing Information</h2>
+        <ul class="space-y-2">
+            <li>Plan: <strong>{{ settings_data.billing_info.plan }}</strong></li>
+            <li>Tours Used: <strong>{{ settings_data.billing_info.tours_used }}</strong> / {{ settings_data.billing_info.tours_limit }}</li>
+        </ul>
+    </section>
+</main>
+{% endblock %}

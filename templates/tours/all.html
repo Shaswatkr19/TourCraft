@@ -1,0 +1,141 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}All Tours{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">All Tours</h1>
+            <p class="text-gray-600 mt-2">Manage all your tours in one place</p>
+        </div>
+        <a href="{% url 'tours:tour_create' %}" 
+           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Create New Tour
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow-sm border p-6 mb-6">
+        <form method="GET" class="flex flex-wrap gap-4">
+            <div class="flex-1 min-w-64">
+                <input type="text" name="search" value="{{ search_query }}" 
+                       placeholder="Search tours..." 
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="min-w-48">
+                <select name="status" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Status</option>
+                    <option value="Draft" {% if status_filter == 'Draft' %}selected{% endif %}>Draft</option>
+                    <option value="Published" {% if status_filter == 'Published' %}selected{% endif %}>Published</option>
+                    <option value="Archived" {% if status_filter == 'Archived' %}selected{% endif %}>Archived</option>
+                </select>
+            </div>
+            <button type="submit" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg">
+                Filter
+            </button>
+        </form>
+    </div>
+
+    <!-- Tours Grid -->
+    {% if tours %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {% for tour in tours %}
+        <div class="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
+            <div class="p-6">
+                <!-- Status Badge -->
+                <div class="flex justify-between items-start mb-3">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if tour.status == 'Published' %}bg-green-100 text-green-800
+                        {% elif tour.status == 'Draft' %}bg-yellow-100 text-yellow-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ tour.status }}
+                    </span>
+                    <div class="text-sm text-gray-500">
+                        {{ tour.view_count }} views
+                    </div>
+                </div>
+
+                <!-- Title & Description -->
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ tour.title }}</h3>
+                <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {{ tour.description|default:"No description provided." }}
+                </p>
+
+                <!-- Stats -->
+                <div class="flex justify-between text-sm text-gray-500 mb-4">
+                    <span>{{ tour.steps.count }} steps</span>
+                    <span>Updated {{ tour.updated_at|timesince }} ago</span>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-2">
+                    <a href="{% url 'tours:tour_detail' tour.pk %}" 
+                       class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center px-4 py-2 rounded-lg text-sm">
+                        View
+                    </a>
+                    <a href="{% url 'tours:tour_edit' tour.pk %}" 
+                       class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm">
+                        Edit
+                    </a>
+                    <a href="{% url 'tours:tour_duplicate' tour.pk %}" 
+                       class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm">
+                        Copy
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center">
+        <nav class="flex items-center gap-2">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                   class="px-3 py-2 text-sm text-gray-600 hover:text-blue-600">First</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                   class="px-3 py-2 text-sm text-gray-600 hover:text-blue-600">Previous</a>
+            {% endif %}
+
+            <span class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                   class="px-3 py-2 text-sm text-gray-600 hover:text-blue-600">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" 
+                   class="px-3 py-2 text-sm text-gray-600 hover:text-blue-600">Last</a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-12">
+        <div class="max-w-sm mx-auto">
+            <svg class="mx-auto h-16 w-16 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No tours found</h3>
+            <p class="text-gray-500 mb-6">Get started by creating your first tour.</p>
+            <a href="{% url 'tours:tour_create' %}" 
+               class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg inline-flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Create Your First Tour
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='your-default-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)  # Changed to True for development
+DEBUG = config('DEBUG', default="False", cast=bool)  # Changed to True for development
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*.onrender.com']
 

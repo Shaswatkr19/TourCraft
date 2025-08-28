@@ -20,7 +20,7 @@ class Command(BaseCommand):
             # Create new superuser
             User.objects.create_superuser(
                 username='admin',
-                email='Shaswatsinha05@gmail.com',
+                email='Shaswatsinha356@gmail.com',
                 password='Shaswat4120@'
             )
             self.stdout.write('Created new superuser: admin/admin123')

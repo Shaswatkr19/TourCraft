@@ -123,3 +123,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.User'
+
+if os.environ.get('FIX_ADMIN'):
+    from django.contrib.auth import get_user_model
+    try:
+        User = get_user_model()
+        user = User.objects.filter(is_superuser=True).first()
+        if user:
+            user.is_staff = True
+            user.save()
+    except:
+        pass

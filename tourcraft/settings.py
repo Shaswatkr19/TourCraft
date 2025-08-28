@@ -11,7 +11,12 @@ SECRET_KEY = config('SECRET_KEY', default='your-default-secret-key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default="False").lower() in ('true', '1', 'yes', 'on') # Changed to True for development
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*.onrender.com']
+ALLOWED_HOSTS = [
+    'tourcraft-c5bw.onrender.com',  # Your Render domain
+    'localhost', 
+    '127.0.0.1',
+    '.onrender.com',  # This will allow all onrender.com subdomains
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -100,7 +105,7 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_ROOT = BASE_DIR / 'media'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Static files storage
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

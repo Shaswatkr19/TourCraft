@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model User {
+  id             Int      @id @default(autoincrement())
+  password       String
+  last_login     DateTime?
+  is_superuser   Boolean  @default(false)
+  username       String   @unique
+  first_name     String?
+  is_staff       Boolean  @default(false)
+  is_active      Boolean  @default(true)
+  email          String
+  profile_picture String?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+  last_name      String?
+  
+  // Relations
+  tours          Tour[]
+  
+  @@map("accounts_user")
+}
+
+model Tour {
+  id          String   @id
+  title       String
+  description String
+  privacy     String
+  status      String
+  thumbnail   String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  creator_id  Int
+  view_count  Int      @default(0)
+  
+  // Relations
+  creator     User     @relation(fields: [creator_id], references: [id])
+  steps       TourStep[]
+  
+  @@map("tours_tour")
+}
+
+model TourStep {
+  id      Int    @id @default(autoincrement())
+  tour_id String
+  // Add other fields as needed
+  
+  tour    Tour   @relation(fields: [tour_id], references: [id])
+  
+  @@map("tours_tourstep")
+}

@@ -20,4 +20,5 @@ urlpatterns = [
     path('<int:tour_pk>/steps/<int:step_pk>/edit/', views.step_edit_view, name='step_edit'),
     path('<int:tour_pk>/steps/<int:step_pk>/delete/', views.step_delete_view, name='step_delete'),
     path('public/<uuid:tour_uuid>/', views.tour_public_view, name='tour_public_view'),
+    
 ]

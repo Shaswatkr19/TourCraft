@@ -185,3 +185,6 @@ api_keys.txt
 travel_cache/
 booking_cache/
 map_cache/
+/generated/prisma
+node_modules/
+migrate-to-neon.js

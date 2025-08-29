@@ -213,3 +213,27 @@ def EnhancedTourCreateView(request):
         'title': 'Enhanced Tour Creation Dashboard'
     }
     return render(request, 'tours/preview_enhanced_v2.html', context)
+
+@login_required
+def tour_create_view(request):
+    """Basic tour creation view"""
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description', '')
+        
+        if title:
+            tour = Tour.objects.create(
+                title=title,
+                description=description,
+                creator=request.user,
+                status='Draft'
+            )
+            messages.success(request, f'Tour "{title}" created successfully!')
+            return redirect('tours:tour_steps', pk=tour.id)
+        else:
+            messages.error(request, 'Tour title is required.')
+    
+    context = {
+        'title': 'Create New Tour'
+    }
+    return render(request, 'tours/tour_create.html', context)

@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='your-default-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default="False").lower() in ('true', '1', 'yes', 'on') # Changed to True for development
+DEBUG = config('DEBUG', default=True).lower() in ('true', '1', 'yes', 'on') # Changed to True for development
 
 ALLOWED_HOSTS = [
     'tourcraft-c5bw.onrender.com',  # Your Render domain
@@ -134,3 +134,26 @@ if os.environ.get('FIX_ADMIN'):
             user.save()
     except:
         pass
+
+
+# Add this for more detailed logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+
+}    

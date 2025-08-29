@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.shortcuts import redirect
 
 app_name = 'tours'
 
@@ -18,4 +19,6 @@ urlpatterns = [
     # API
     path('<int:pk>/api/', views.tour_api_data, name='tour_api_data'),
     path('create/enhanced/', views.EnhancedTourCreateView, name='enhanced_tour_create'),
+    path('create/', lambda request: redirect('tours:enhanced_tour_create')),
 ]
+

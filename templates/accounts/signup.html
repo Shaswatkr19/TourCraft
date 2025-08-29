@@ -265,10 +265,14 @@
                     <div class="success-message">
                         {{ message }}
                     </div>
-                {% else %}
+                {% elif 'error' in message.tags %}
                     <div class="error-message">
                         {{ message }}
                     </div>
+                {% else %}
+                    <div class="info-message">
+                        {{ message }}
+                    </div>        
                 {% endif %}
             {% endfor %}
     {% endif %}

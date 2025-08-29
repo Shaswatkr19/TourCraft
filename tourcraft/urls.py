@@ -11,7 +11,7 @@ urlpatterns = [
     path('', include('django.contrib.auth.urls')),  # Login/logout URLs
     
     # Remove this conflicting line:
-    # path('', include(('accounts.urls', 'root_accounts'), namespace='root_accounts')),
+    path('', include(('accounts.urls', 'root_accounts'), namespace='root_accounts')),
     
     # Keep pages at the end for homepage
     path('', include('pages.urls')),  # This will handle homepage

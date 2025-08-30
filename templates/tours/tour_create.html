@@ -1,1343 +1,957 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TourCraft - Enhanced Interactive Tour Editor</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        /* Enhanced Animations & Effects */
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        /* Global Styles */
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            min-height: 100vh;
-            margin: 0;
-            overflow-x: hidden;
-        }
-
-        /* Enhanced Navbar */
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.25rem 2.5rem;
-            background: rgba(248, 250, 252, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #3b82f6;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .logo i {
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        .topbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .btn-save {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-        }
-
-        .btn-save:hover {
-            background: linear-gradient(135deg, #059669, #047857);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-        }
-
-        .btn-preview {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
-        }
-
-        .btn-preview:hover {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-        }
-
-        /* Hero Section Enhanced */
-        .editor-hero {
-            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-            color: white;
-            padding: 3rem 0;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .editor-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.1);
-            z-index: 1;
-        }
-
-        .editor-hero .container {
-            position: relative;
-            z-index: 2;
-        }
-
-        .editor-hero h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            animation: fadeInUp 1s ease-out;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            letter-spacing: -1px;
-        }
-
-        .editor-hero p {
-            font-size: 1.2rem;
-            opacity: 0.95;
-            max-width: 600px;
-            margin: 0 auto;
-            animation: fadeInUp 1s ease-out 0.2s both;
-            line-height: 1.6;
-            font-weight: 300;
-        }
-
-        /* Main Editor Container */
-        .editor-container {
-            display: flex;
-            gap: 2rem;
-            padding: 2rem;
-            min-height: calc(100vh - 200px);
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 350px;
-            background: linear-gradient(145deg, #ffffff, #f8fafc);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
-            padding: 2rem;
-            height: fit-content;
-            position: sticky;
-            top: 120px;
-        }
-
-        .sidebar h3 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        /* Tool Palette */
-        .tool-palette {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .tool-item {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            padding: 1rem;
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .tool-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .tool-item:hover::before {
-            left: 100%;
-        }
-
-        .tool-item:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
-        }
-
-        .tool-item i {
-            font-size: 1.5rem;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-
-        .tool-item span {
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        /* Step List */
-        .steps-container {
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 0.5rem;
-        }
-
-        .step-item {
-            background: linear-gradient(145deg, #f8fafc, #e2e8f0);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .step-item:hover {
-            border-color: #3b82f6;
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .step-item.active {
-            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-            border-color: #3b82f6;
-            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.2);
-        }
-
-        .step-number {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            float: left;
-            margin-right: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .step-content h5 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 0.5rem;
-        }
-
-        .step-content p {
-            font-size: 0.85rem;
-            color: #6b7280;
-            margin: 0;
-            line-height: 1.4;
-        }
-
-        /* Main Canvas */
-        .canvas-container {
-            flex: 1;
-            background: linear-gradient(145deg, #ffffff, #f8fafc);
-            border-radius: 16px;
-            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
-            padding: 2rem;
-            position: relative;
-            min-height: 600px;
-        }
-
-        .canvas-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        .canvas-header h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .canvas-tools {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .canvas-tools button {
-            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-            border: none;
-            padding: 0.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .canvas-tools button:hover {
-            background: linear-gradient(135deg, #e5e7eb, #d1d5db);
-            transform: translateY(-2px);
-        }
-
-        .canvas-tools button.active {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-        }
-
-        /* Screen Recording Area */
-        .recording-area {
-            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
-            border: 2px dashed #d1d5db;
-            border-radius: 12px;
-            padding: 3rem;
-            text-align: center;
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .recording-area.recording {
-            border-color: #ef4444;
-            background: linear-gradient(135deg, #fee2e2, #fecaca);
-            animation: pulse 1s ease-in-out infinite;
-        }
-
-        .recording-area.has-content {
-            border-style: solid;
-            border-color: #10b981;
-            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-        }
-
-        .record-btn {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .record-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .record-btn:hover::before {
-            left: 100%;
-        }
-
-        .record-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(239, 68, 68, 0.4);
-        }
-
-        .record-btn.recording {
-            background: linear-gradient(135deg, #10b981, #059669);
-            animation: pulse 1s ease-in-out infinite;
-        }
-
-        /* Screenshot Preview */
-        .screenshot-preview {
-            max-width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-        }
-
-        /* Properties Panel */
-        .properties-panel {
-            background: linear-gradient(145deg, #f8fafc, #e2e8f0);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .properties-panel h4 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #1f2937;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #374151;
-            font-size: 0.9rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        .form-control:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            outline: none;
-        }
-
-        /* Action Buttons */
-        .action-buttons {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 2rem;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 0.9rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #6b7280, #4b5563);
-            color: white;
-            box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
-        }
-
-        .btn-secondary:hover {
-            background: linear-gradient(135deg, #4b5563, #374151);
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-        }
-
-        .btn-success:hover {
-            background: linear-gradient(135deg, #059669, #047857);
-            transform: translateY(-2px);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .editor-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .sidebar {
-                width: 100%;
-                position: relative;
-                top: auto;
-            }
-            
-            .tool-palette {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .topbar {
-                padding: 1rem;
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-            
-            .editor-hero h1 {
-                font-size: 2rem;
-            }
-            
-            .editor-container {
-                padding: 1rem;
-            }
-            
-            .canvas-container {
-                padding: 1rem;
-            }
-            
-            .recording-area {
-                padding: 2rem 1rem;
-            }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
-        }
-
-        /* Loading Animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .fade-in {
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        /* Notification Toast */
-        .toast {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.error {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-    </style>
-</head>
-<body>
-    <!-- Enhanced Topbar -->
-    <div class="topbar">
-        <a href="#" class="logo">
-            <i class="fas fa-video"></i>
-            <span>TourCraft Editor</span>
-        </a>
-        <div class="topbar-actions">
-            <button class="btn-save" onclick="saveTour()">
-                <i class="fas fa-save"></i> Save Tour
-            </button>
-            <button class="btn-preview" onclick="previewTour()">
-                <i class="fas fa-play"></i> Preview
-            </button>
-            <button class="btn btn-secondary" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i> Back
-            </button>
-        </div>
-    </div>
-
-    <!-- Hero Section -->
-    <div class="editor-hero">
-        <div class="container">
-            <h1><i class="fas fa-magic"></i> Visual Tour Editor</h1>
-            <p>Create engaging interactive tours with drag-and-drop simplicity. Add steps, record screens, and build amazing user experiences.</p>
-        </div>
-    </div>
-
-    <!-- Main Editor Container -->
-    <div class="editor-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <h3><i class="fas fa-toolbox"></i> Tools & Elements</h3>
-            
-            <!-- Tool Palette -->
-            <div class="tool-palette">
-                <button class="tool-item" onclick="addStep('text')" title="Add Text Step">
-                    <i class="fas fa-font"></i>
-                    <span>Text</span>
-                </button>
-                <button class="tool-item" onclick="addStep('highlight')" title="Add Highlight">
-                    <i class="fas fa-highlighter"></i>
-                    <span>Highlight</span>
-                </button>
-                <button class="tool-item" onclick="addStep('tooltip')" title="Add Tooltip">
-                    <i class="fas fa-comment"></i>
-                    <span>Tooltip</span>
-                </button>
-                <button class="tool-item" onclick="addStep('arrow')" title="Add Arrow">
-                    <i class="fas fa-arrow-right"></i>
-                    <span>Arrow</span>
-                </button>
-                <button class="tool-item" onclick="addStep('screenshot')" title="Add Screenshot">
-                    <i class="fas fa-camera"></i>
-                    <span>Screenshot</span>
-                </button>
-                <button class="tool-item" onclick="addStep('video')" title="Record Video">
-                    <i class="fas fa-video"></i>
-                    <span>Video</span>
-                </button>
-                <button class="tool-item" onclick="addStep('hotspot')" title="Add Hotspot">
-                    <i class="fas fa-crosshairs"></i>
-                    <span>Hotspot</span>
-                </button>
-                <button class="tool-item" onclick="addStep('quiz')" title="Add Quiz">
-                    <i class="fas fa-question-circle"></i>
-                    <span>Quiz</span>
-                </button>
-            </div>
-
-            <!-- Steps List -->
-            <h4><i class="fas fa-list-ol"></i> Tour Steps</h4>
-            <div class="steps-container" id="stepsList">
-                <div class="step-item active" onclick="selectStep(1)">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <h5>Welcome Step</h5>
-                        <p>Introduction to the tour</p>
-                    </div>
-                </div>
-                <div class="step-item" onclick="selectStep(2)">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <h5>Main Dashboard</h5>
-                        <p>Overview of the main interface</p>
-                    </div>
-                </div>
-                <div class="step-item" onclick="selectStep(3)">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <h5>Navigation Menu</h5>
-                        <p>How to navigate through sections</p>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn btn-primary w-100 mt-3" onclick="addNewStep()">
-                <i class="fas fa-plus"></i> Add New Step
-            </button>
-        </div>
-
-        <!-- Main Canvas -->
-        <div class="canvas-container">
-            <div class="canvas-header">
-                <h2><i class="fas fa-edit"></i> Step 1: Welcome Step</h2>
-                <div class="canvas-tools">
-                    <button title="Select Tool" class="active"><i class="fas fa-mouse-pointer"></i></button>
-                    <button title="Pan Tool"><i class="fas fa-hand-paper"></i></button>
-                    <button title="Zoom In"><i class="fas fa-search-plus"></i></button>
-                    <button title="Zoom Out"><i class="fas fa-search-minus"></i></button>
-                    <button title="Reset View"><i class="fas fa-expand-arrows-alt"></i></button>
-                </div>
-            </div>
-
-            <!-- Recording Area -->
-            <div class="recording-area" id="recordingArea">
-                <div class="recording-controls">
-                    <i class="fas fa-video" style="font-size: 3rem; color: #6b7280; margin-bottom: 1rem;"></i>
-                    <h4>Record Your Screen or Upload Content</h4>
-                    <p>Click to start recording your screen or drag and drop images/videos</p>
-                    <button class="record-btn" onclick="toggleRecording()">
-                        <i class="fas fa-circle"></i> Start Recording
-                    </button>
-                    <div style="margin-top: 1rem;">
-                        <input type="file" id="fileUpload" accept="image/*,video/*" style="display: none;" onchange="handleFileUpload(event)">
-                        <button class="btn btn-secondary" onclick="document.getElementById('fileUpload').click()">
-                            <i class="fas fa-upload"></i> Upload File
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Properties Panel -->
-            <div class="properties-panel">
-                <h4><i class="fas fa-cog"></i> Step Properties</h4>
-                <div class="form-group">
-                    <label for="stepTitle">Step Title</label>
-                    <input type="text" id="stepTitle" class="form-control" value="Welcome Step" placeholder="Enter step title">
-                </div>
-                <div class="form-group">
-                    <label for="stepDescription">Description</label>
-                    <textarea id="stepDescription" class="form-control" rows="3" placeholder="Describe what this step teaches...">Welcome to our application! This tour will guide you through the main features and help you get started.</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="stepDuration">Duration (seconds)</label>
-                    <input type="number" id="stepDuration" class="form-control" value="5" min="1" max="60">
-                </div>
-                <div class="form-group">
-                    <label for="stepAnimation">Animation Type</label>
-                    <select id="stepAnimation" class="form-control">
-                        <option value="fadeIn">Fade In</option>
-                        <option value="slideUp">Slide Up</option>
-                        <option value="slideDown">Slide Down</option>
-                        <option value="zoom">Zoom In</option>
-                        <option value="bounce">Bounce</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="saveCurrentStep()">
-                    <i class="fas fa-check"></i> Save Step
-                </button>
-                <button class="btn btn-secondary" onclick="duplicateStep()">
-                    <i class="fas fa-copy"></i> Duplicate
-                </button>
-                <button class="btn btn-secondary" onclick="deleteStep()">
-                    <i class="fas fa-trash"></i> Delete Step
-                </button>
-                <button class="btn btn-success" onclick="previewStep()">
-                    <i class="fas fa-play"></i> Preview Step
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Create Interactive Tour - TourCraft{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/tour-editor.css' %}">
+<style>
+/* Enhanced Animations & Effects */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Hero Section - Simplified for direct creation */
+.creation-hero {
+    background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    color: white;
+    padding: 3rem 0;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.creation-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.1);
+    z-index: 1;
+}
+
+.creation-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.creation-hero h1 {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    animation: fadeInUp 1s ease-out;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    letter-spacing: -1px;
+}
+
+.creation-hero p {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    max-width: 600px;
+    margin: 0 auto 1.5rem;
+    animation: fadeInUp 1s ease-out 0.2s both;
+    line-height: 1.6;
+    font-weight: 300;
+}
+
+/* Enhanced Navbar */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 2.5rem;
+    background: rgba(248, 250, 252, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.topbar .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.topbar .back-btn {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.topbar .back-btn:hover {
+    background: linear-gradient(135deg, #4b5563, #374151);
+    transform: translateY(-1px);
+    color: white;
+}
+
+.topbar .welcome {
+    font-weight: 600;
+    color: #374151;
+    font-size: 1rem;
+}
+
+.topbar .logout-btn {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.topbar .logout-btn:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Enhanced Form Styling */
+.card {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: 0 15px 35px -5px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+    padding: 1.5rem;
+    font-weight: 700;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 2px solid #e5e7eb;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    transform: scale(1.02);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border: none;
+    border-radius: 10px;
+    padding: 0.875rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* Tour Editor Styles */
+.tour-editor {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin: 2rem 0;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.tour-editor-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.tour-editor-body {
+    padding: 2rem;
+}
+
+.editor-controls {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.step-item {
+    background: linear-gradient(145deg, #ffffff, #f8fafc);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    transition: all 0.3s ease;
+}
+
+.step-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.tour-preview {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.step-preview {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.step-preview:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.saved-item {
+    background: linear-gradient(145deg, #ffffff, #f8fafc);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    transition: all 0.3s ease;
+}
+
+.saved-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.saved-actions button {
+    margin-left: 0.75rem;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-sm:hover {
+    transform: translateY(-1px);
+}
+
+/* Quick Creation Options */
+.quick-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.quick-option {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 2px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quick-option:hover {
+    border-color: #3b82f6;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+}
+
+.quick-option.selected {
+    border-color: #10b981;
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .creation-hero h1 {
+        font-size: 2.2rem;
+    }
     
-    <script>
-        let currentStep = 1;
-        let isRecording = false;
-        let tourData = {
-            steps: [
-                {
-                    id: 1,
-                    title: "Welcome Step",
-                    description: "Welcome to our application! This tour will guide you through the main features and help you get started.",
-                    duration: 5,
-                    animation: "fadeIn",
-                    content: null
-                },
-                {
-                    id: 2,
-                    title: "Main Dashboard",
-                    description: "Overview of the main interface",
-                    duration: 8,
-                    animation: "slideUp",
-                    content: null
-                },
-                {
-                    id: 3,
-                    title: "Navigation Menu",
-                    description: "How to navigate through sections",
-                    duration: 6,
-                    animation: "zoom",
-                    content: null
-                }
-            ]
+    .topbar {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .editor-controls {
+        flex-direction: column;
+    }
+    
+    .quick-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+.fade-in {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border-radius: 10px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Enhanced Topbar with Back Button -->
+<div class="topbar">
+    <div class="nav-left">
+        <a href="/" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <span class="welcome">Welcome back, {{ user.username }}</span>
+    </div>
+    <div>
+        <form method="POST" action="{% url 'accounts:logout' %}" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+</div>
+
+<!-- Streamlined Hero Section -->
+<div class="creation-hero">
+    <div class="container">
+        <h1>Create Your Interactive Tour</h1>
+        <p>Start building your tour right away with our quick setup options</p>
+    </div>
+</div>
+
+<div class="container">
+    
+    <!-- Quick Creation Options -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Quick Start Options</h4>
+                </div>
+                <div class="card-body">
+                    <div class="quick-options">
+                        <div class="quick-option" onclick="createQuickTour('blank')">
+                            <i class="fas fa-plus-circle fa-2x mb-2 text-primary"></i>
+                            <h6>Blank Tour</h6>
+                            <p class="small text-muted">Start with a clean slate</p>
+                        </div>
+                        <div class="quick-option" onclick="createQuickTour('template')">
+                            <i class="fas fa-magic fa-2x mb-2 text-info"></i>
+                            <h6>Use Template</h6>
+                            <p class="small text-muted">Pre-built tour structure</p>
+                        </div>
+                        <div class="quick-option" onclick="createQuickTour('import')">
+                            <i class="fas fa-upload fa-2x mb-2 text-warning"></i>
+                            <h6>Import Existing</h6>
+                            <p class="small text-muted">Load from previous tour</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Custom Tour Form (Initially Hidden) -->
+                    <div id="customTourForm" style="display: none;" class="mt-4 fade-in">
+                        <form id="basicTourForm">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="tourTitle" class="form-label">Tour Title</label>
+                                        <input type="text" class="form-control" id="tourTitle" name="title" required placeholder="e.g., Getting Started Guide">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="tourPrivacy" class="form-label">Privacy</label>
+                                        <select class="form-select" id="tourPrivacy" name="privacy">
+                                            <option value="private">Private</option>
+                                            <option value="public">Public</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label class="form-label">&nbsp;</label>
+                                        <button type="submit" class="btn btn-success w-100">Create Tour</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label for="tourDescription" class="form-label">Description (Optional)</label>
+                                        <textarea class="form-control" id="tourDescription" name="description" rows="2" placeholder="Brief description of what this tour covers..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tour Editor Container -->
+    <div id="tourEditorContainer" style="display: none;">
+        <div class="tour-editor">
+            <div class="tour-editor-header">
+                <h2 id="tourEditorTitle">Tour Editor</h2>
+                <p id="tourEditorSubtitle">Building: New Tour</p>
+            </div>
+            <div class="tour-editor-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Tour Steps</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="editor-controls">
+                                    <button class="btn btn-success" onclick="addTourStep()">
+                                        <i class="fas fa-plus"></i> Add Step
+                                    </button>
+                                    <button class="btn btn-info" onclick="previewTour()">
+                                        <i class="fas fa-play"></i> Preview
+                                    </button>
+                                    <button class="btn btn-primary" onclick="saveTour()">
+                                        <i class="fas fa-save"></i> Save
+                                    </button>
+                                    <button class="btn btn-warning" onclick="publishTour()">
+                                        <i class="fas fa-share"></i> Publish
+                                    </button>
+                                </div>
+                                <div id="stepsList">
+                                    <p class="text-muted small">No steps added yet. Click "Add Step" to begin.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Live Preview</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="tourPreview">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-play-circle fa-3x mb-3"></i>
+                                        <p>Add steps to see preview</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Tours Section -->
+    <div class="saved-tours" id="savedToursContainer" style="display:none;">
+        <h3>Your Saved Tours</h3>
+        <div id="savedToursList"></div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/screen-recorder.js' %}"></script>
+<script src="{% static 'js/tour-editor.js' %}"></script>
+<script>
+// Global tour data
+let currentTour = {
+    id: null,
+    title: '',
+    description: '',
+    privacy: 'private',
+    steps: []
+};
+let stepCounter = 0;
+
+// Quick Tour Creation
+function createQuickTour(type) {
+    console.log('Creating quick tour of type:', type);
+    
+    // Remove selected class from all options
+    document.querySelectorAll('.quick-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked option
+    event.target.closest('.quick-option').classList.add('selected');
+    
+    switch(type) {
+        case 'blank':
+            createBlankTour();
+            break;
+        case 'template':
+            showTemplateOptions();
+            break;
+        case 'import':
+            showImportOptions();
+            break;
+        default:
+            showCustomForm();
+    }
+}
+
+function createBlankTour() {
+    console.log('Creating blank tour...');
+    
+    currentTour = {
+        id: Date.now(),
+        title: 'New Interactive Tour',
+        description: 'Created with quick start',
+        privacy: 'private',
+        steps: [],
+        created_at: new Date().toLocaleString()
+    };
+    
+    // Show editor immediately
+    showTourEditor();
+    saveTour();
+}
+
+function showTemplateOptions() {
+    alert('Template selection coming soon! For now, creating a blank tour.');
+    createBlankTour();
+}
+
+function showImportOptions() {
+    const tours = JSON.parse(localStorage.getItem('saved_tours') || '[]');
+    if (tours.length === 0) {
+        alert('No saved tours found. Creating a blank tour instead.');
+        createBlankTour();
+        return;
+    }
+    
+    const tourList = tours.map((tour, index) => 
+        `${index + 1}. ${tour.title} (${tour.steps.length} steps)`
+    ).join('\n');
+    
+    const selection = prompt(`Select a tour to import:\n\n${tourList}\n\nEnter the number:`);
+    const tourIndex = parseInt(selection) - 1;
+    
+    if (tourIndex >= 0 && tourIndex < tours.length) {
+        const selectedTour = tours[tourIndex];
+        currentTour = {
+            ...selectedTour,
+            id: Date.now(),
+            title: `${selectedTour.title} (Copy)`,
+            created_at: new Date().toLocaleString()
         };
+        showTourEditor();
+        saveTour();
+    } else {
+        alert('Invalid selection. Creating blank tour.');
+        createBlankTour();
+    }
+}
 
-        // Initialize editor
-        document.addEventListener('DOMContentLoaded', function() {
-            loadTour();
-            addEnhancedAnimations();
-        });
+function showCustomForm() {
+    document.getElementById('customTourForm').style.display = 'block';
+    document.getElementById('customTourForm').scrollIntoView({ behavior: 'smooth' });
+}
 
-        function addEnhancedAnimations() {
-            // Animate elements on load
-            const animatedElements = document.querySelectorAll('.sidebar, .canvas-container');
-            animatedElements.forEach((el, index) => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(30px)';
-                setTimeout(() => {
-                    el.style.transition = 'all 0.6s ease-out';
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateY(0)';
-                }, index * 200);
-            });
+function showTourEditor() {
+    const container = document.getElementById('tourEditorContainer');
+    container.style.display = 'block';
+    container.classList.add('fade-in');
+    container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    updateEditorTitle();
+    initializeTourEditor();
+}
 
-            // Add hover effects to tool items
-            const toolItems = document.querySelectorAll('.tool-item');
-            toolItems.forEach((item, index) => {
-                item.style.animationDelay = `${index * 0.1}s`;
-                item.addEventListener('click', function() {
-                    this.style.animation = 'bounce 0.6s ease';
-                    setTimeout(() => {
-                        this.style.animation = '';
-                    }, 600);
-                });
-            });
-        }
+function updateEditorTitle() {
+    document.getElementById('tourEditorTitle').textContent = 'Tour Editor';
+    document.getElementById('tourEditorSubtitle').textContent = `Building: ${currentTour.title}`;
+}
 
-        function loadTour() {
-            updateStepsList();
-            selectStep(1);
-        }
+function initializeTourEditor() {
+    updateStepsList();
+    updateTourPreview();
+}
 
-        function updateStepsList() {
-            const stepsList = document.getElementById('stepsList');
-            stepsList.innerHTML = '';
-            
-            tourData.steps.forEach((step, index) => {
-                const stepElement = document.createElement('div');
-                stepElement.className = `step-item ${step.id === currentStep ? 'active' : ''}`;
-                stepElement.onclick = () => selectStep(step.id);
-                
-                stepElement.innerHTML = `
-                    <div class="step-number">${index + 1}</div>
-                    <div class="step-content">
-                        <h5>${step.title}</h5>
-                        <p>${step.description}</p>
-                    </div>
-                `;
-                
-                stepsList.appendChild(stepElement);
-                
-                // Animate step items
-                setTimeout(() => {
-                    stepElement.classList.add('fade-in');
-                }, index * 100);
-            });
-        }
+// Tour Step Management
+function addTourStep() {
+    stepCounter++;
+    const newStep = {
+        id: stepCounter,
+        title: `Step ${stepCounter}`,
+        description: 'Click to edit description',
+        target: '',
+        position: 'bottom'
+    };
+    currentTour.steps.push(newStep);
+    updateStepsList();
+    updateTourPreview();
+}
 
-        function selectStep(stepId) {
-            currentStep = stepId;
-            const step = tourData.steps.find(s => s.id === stepId);
-            
-            if (step) {
-                // Update UI
-                document.querySelector('.canvas-header h2').innerHTML = 
-                    `<i class="fas fa-edit"></i> Step ${stepId}: ${step.title}`;
-                
-                document.getElementById('stepTitle').value = step.title;
-                document.getElementById('stepDescription').value = step.description;
-                document.getElementById('stepDuration').value = step.duration;
-                document.getElementById('stepAnimation').value = step.animation;
-                
-                // Update active step in sidebar
-                document.querySelectorAll('.step-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                document.querySelectorAll('.step-item')[stepId - 1]?.classList.add('active');
-                
-                // Update recording area based on step content
-                updateRecordingArea(step);
-                
-                showToast('Step selected: ' + step.title);
-            }
-        }
+function editStep(stepId) {
+    const step = currentTour.steps.find(s => s.id === stepId);
+    if (!step) return;
+    
+    const newTitle = prompt('Enter step title:', step.title);
+    const newDesc = prompt('Enter step description:', step.description);
+    
+    if (newTitle !== null && newTitle.trim() !== '') {
+        step.title = newTitle.trim();
+    }
+    if (newDesc !== null && newDesc.trim() !== '') {
+        step.description = newDesc.trim();
+    }
+    
+    updateStepsList();
+    updateTourPreview();
+}
 
-        function updateRecordingArea(step) {
-            const recordingArea = document.getElementById('recordingArea');
-            
-            if (step.content) {
-                recordingArea.classList.add('has-content');
-                recordingArea.innerHTML = `
-                    <div style="position: relative;">
-                        <img src="${step.content}" alt="Step content" class="screenshot-preview" style="max-width: 100%; border-radius: 8px;">
-                        <button class="btn btn-secondary" style="position: absolute; top: 10px; right: 10px;" onclick="removeContent()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <p style="margin-top: 1rem; color: #059669; font-weight: 600;">
-                        <i class="fas fa-check-circle"></i> Content added successfully
-                    </p>
-                `;
-            } else {
-                recordingArea.classList.remove('has-content');
-                recordingArea.innerHTML = `
-                    <div class="recording-controls">
-                        <i class="fas fa-video" style="font-size: 3rem; color: #6b7280; margin-bottom: 1rem;"></i>
-                        <h4>Record Your Screen or Upload Content</h4>
-                        <p>Click to start recording your screen or drag and drop images/videos</p>
-                        <button class="record-btn" onclick="toggleRecording()">
-                            <i class="fas fa-circle"></i> Start Recording
-                        </button>
-                        <div style="margin-top: 1rem;">
-                            <input type="file" id="fileUpload" accept="image/*,video/*" style="display: none;" onchange="handleFileUpload(event)">
-                            <button class="btn btn-secondary" onclick="document.getElementById('fileUpload').click()">
-                                <i class="fas fa-upload"></i> Upload File
-                            </button>
+function deleteStep(stepId) {
+    if (confirm('Delete this step?')) {
+        currentTour.steps = currentTour.steps.filter(s => s.id !== stepId);
+        updateStepsList();
+        updateTourPreview();
+    }
+}
+
+function updateStepsList() {
+    const container = document.getElementById('stepsList');
+    
+    if (currentTour.steps.length === 0) {
+        container.innerHTML = '<p class="text-muted small">No steps added yet. Click "Add Step" to begin.</p>';
+        return;
+    }
+    
+    container.innerHTML = currentTour.steps.map(step => `
+        <div class="step-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold">${step.title}</span>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="editStep(${step.id})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteStep(${step.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <small class="text-muted">${step.description}</small>
+        </div>
+    `).join('');
+}
+
+function updateTourPreview() {
+    const preview = document.getElementById('tourPreview');
+    
+    if (currentTour.steps.length === 0) {
+        preview.innerHTML = '<div class="text-center text-muted"><i class="fas fa-play-circle fa-3x mb-3"></i><p>Add steps to see preview</p></div>';
+        return;
+    }
+    
+    preview.innerHTML = `
+        <div class="tour-preview">
+            <h6>Preview: ${currentTour.title}</h6>
+            <div class="steps-preview">
+                ${currentTour.steps.map((step, index) => `
+                    <div class="step-preview">
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary me-2">${index + 1}</span>
+                            <div>
+                                <strong>${step.title}</strong><br>
+                                <small class="text-muted">${step.description}</small>
+                            </div>
                         </div>
                     </div>
-                `;
-            }
-        }
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
 
-        function addStep(type) {
-            showToast(`Adding ${type} element...`, 'info');
-            
-            // Simulate adding element with animation
-            const button = event.target.closest('.tool-item');
-            button.style.transform = 'scale(0.95)';
-            button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-            
-            setTimeout(() => {
-                button.style.transform = '';
-                button.style.background = '';
-                showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} element added!`);
-            }, 300);
-        }
+function previewTour() {
+    if (currentTour.steps.length === 0) {
+        alert('Add some steps before previewing.');
+        return;
+    }
+    
+    const info = `Preview: ${currentTour.title}\nSteps: ${currentTour.steps.length}\n\n${currentTour.steps.map((s, i) => `${i+1}. ${s.title}`).join('\n')}`;
+    alert(info);
+}
 
-        function toggleRecording() {
-            const recordBtn = document.querySelector('.record-btn');
-            const recordingArea = document.getElementById('recordingArea');
-            
-            if (!isRecording) {
-                // Start recording
-                isRecording = true;
-                recordBtn.innerHTML = '<div class="loading"></div> Stop Recording';
-                recordBtn.classList.add('recording');
-                recordingArea.classList.add('recording');
-                
-                showToast('Recording started...', 'info');
-                
-                // Simulate recording for 3 seconds
-                setTimeout(() => {
-                    stopRecording();
-                }, 3000);
-            } else {
-                stopRecording();
-            }
-        }
+function saveTour() {
+    if (!currentTour.title.trim()) {
+        alert('Please enter a tour title.');
+        return;
+    }
+    
+    currentTour.id = currentTour.id || Date.now();
+    currentTour.updated_at = new Date().toLocaleString();
+    
+    let tours = JSON.parse(localStorage.getItem('saved_tours') || '[]');
+    const existingIndex = tours.findIndex(t => t.id === currentTour.id);
+    
+    if (existingIndex >= 0) {
+        tours[existingIndex] = { ...currentTour };
+    } else {
+        tours.push({ ...currentTour });
+    }
+    
+    localStorage.setItem('saved_tours', JSON.stringify(tours));
+    alert('Tour saved successfully!');
+    renderSavedTours();
+}
 
-        function stopRecording() {
-            isRecording = false;
-            const recordBtn = document.querySelector('.record-btn');
-            const recordingArea = document.getElementById('recordingArea');
-            
-            recordBtn.innerHTML = '<i class="fas fa-circle"></i> Start Recording';
-            recordBtn.classList.remove('recording');
-            recordingArea.classList.remove('recording');
-            
-            // Simulate successful recording
-            const step = tourData.steps.find(s => s.id === currentStep);
-            if (step) {
-                step.content = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='; // Placeholder
-                updateRecordingArea(step);
-            }
-            
-            showToast('Recording saved successfully!');
-        }
+function publishTour() {
+    if (currentTour.steps.length === 0) {
+        alert('Add some steps before publishing.');
+        return;
+    }
+    
+    if (confirm('Publish this tour? It will be available to others.')) {
+        currentTour.privacy = 'public';
+        saveTour();
+        alert('Tour published successfully!');
+    }
+}
 
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const step = tourData.steps.find(s => s.id === currentStep);
-                    if (step) {
-                        step.content = e.target.result;
-                        updateRecordingArea(step);
-                        showToast('File uploaded successfully!');
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function removeContent() {
-            const step = tourData.steps.find(s => s.id === currentStep);
-            if (step) {
-                step.content = null;
-                updateRecordingArea(step);
-                showToast('Content removed');
-            }
-        }
-
-        function addNewStep() {
-            const newStep = {
-                id: tourData.steps.length + 1,
-                title: `New Step ${tourData.steps.length + 1}`,
-                description: "Description for the new step",
-                duration: 5,
-                animation: "fadeIn",
-                content: null
-            };
-            
-            tourData.steps.push(newStep);
-            updateStepsList();
-            selectStep(newStep.id);
-            
-            showToast('New step added!');
-        }
-
-        function saveCurrentStep() {
-            const step = tourData.steps.find(s => s.id === currentStep);
-            if (step) {
-                step.title = document.getElementById('stepTitle').value;
-                step.description = document.getElementById('stepDescription').value;
-                step.duration = parseInt(document.getElementById('stepDuration').value);
-                step.animation = document.getElementById('stepAnimation').value;
-                
-                updateStepsList();
-                showToast('Step saved successfully!');
-            }
-        }
-
-        function duplicateStep() {
-            const step = tourData.steps.find(s => s.id === currentStep);
-            if (step) {
-                const newStep = {
-                    ...step,
-                    id: tourData.steps.length + 1,
-                    title: step.title + ' (Copy)'
-                };
-                
-                tourData.steps.push(newStep);
-                updateStepsList();
-                selectStep(newStep.id);
-                
-                showToast('Step duplicated!');
-            }
-        }
-
-        function deleteStep() {
-            if (tourData.steps.length <= 1) {
-                showToast('Cannot delete the last step', 'error');
-                return;
-            }
-            
-            if (confirm('Are you sure you want to delete this step?')) {
-                tourData.steps = tourData.steps.filter(s => s.id !== currentStep);
-                
-                // Reassign IDs
-                tourData.steps.forEach((step, index) => {
-                    step.id = index + 1;
-                });
-                
-                currentStep = 1;
-                updateStepsList();
-                selectStep(1);
-                
-                showToast('Step deleted');
-            }
-        }
-
-        function previewStep() {
-            showToast('Opening step preview...', 'info');
-            
-            // Simulate preview loading
-            setTimeout(() => {
-                const step = tourData.steps.find(s => s.id === currentStep);
-                alert(`Preview: ${step.title}\n\n${step.description}\n\nDuration: ${step.duration}s\nAnimation: ${step.animation}`);
-            }, 1000);
-        }
-
-        function saveTour() {
-            const saveBtn = document.querySelector('.btn-save');
-            const originalText = saveBtn.innerHTML;
-            
-            saveBtn.innerHTML = '<div class="loading"></div> Saving...';
-            saveBtn.disabled = true;
-            
-            // Simulate save operation
-            setTimeout(() => {
-                saveBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
-                saveBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-                
-                setTimeout(() => {
-                    saveBtn.innerHTML = originalText;
-                    saveBtn.disabled = false;
-                    saveBtn.style.background = '';
-                }, 2000);
-                
-                showToast('Tour saved successfully!');
-            }, 1500);
-        }
-
-        function previewTour() {
-    // Open new tab immediately to avoid popup blocking
-            const previewWindow = window.open('', '_blank');
-
-            if (!previewWindow) {
-                showToast('Popup blocked! Please allow popups for this site.', 'error');
-                return;
-            }
-
-    // Build preview HTML
-            let previewHTML = `
-                <html>
-                <head>
-                    <title>Tour Preview</title>
-                    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 2rem; background: #f1f5f9; }
-                        .step { border: 2px solid #3b82f6; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; background: white; }
-                        h3 { margin-top: 0; }
-                    </style>
-                </head>
-                <body>
-                    <h2>Tour Preview</h2>
-                    ${tourData.steps.map(step => `
-                        <div class="step">
-                            <h3>${step.title}</h3>
-                            <p>${step.description}</p>
-                            <small>Duration: ${step.duration}s | Animation: ${step.animation}</small>
-                        </div>
-                    `).join('')}
-                </body>
-                </html>
-            `;
-
-            previewWindow.document.write(previewHTML);
-            previewWindow.document.close();
-
-            showToast('Tour preview opened in new tab');
-        }
-
-        function goBack() {
-            if (confirm('Are you sure you want to go back? Any unsaved changes will be lost.')) {
-                window.history.back();
-            }
-        }
-
-        function showToast(message, type = 'success') {
-            // Remove existing toast
-            const existingToast = document.querySelector('.toast');
-            if (existingToast) {
-                existingToast.remove();
-            }
-            
-            // Create new toast
-            const toast = document.createElement('div');
-            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
-            toast.innerHTML = `
-                <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : 'check-circle'}"></i>
-                ${message}
-            `;
-            
-            document.body.appendChild(toast);
-            
-            // Show toast
-            setTimeout(() => toast.classList.add('show'), 100);
-            
-            // Hide toast after 3 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key) {
-                    case 's':
-                        e.preventDefault();
-                        saveTour();
-                        break;
-                    case 'p':
-                        e.preventDefault();
-                        previewTour();
-                        break;
-                    case 'n':
-                        e.preventDefault();
-                        addNewStep();
-                        break;
-                }
-            }
-        });
-
-        // Add drag and drop functionality
-        const recordingArea = document.getElementById('recordingArea');
-        
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            recordingArea.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
+// Custom Form Handler
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('basicTourForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
-            e.stopPropagation();
-        }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            recordingArea.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            recordingArea.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight(e) {
-            recordingArea.style.borderColor = '#3b82f6';
-            recordingArea.style.background = 'linear-gradient(135deg, #dbeafe, #bfdbfe)';
-        }
-
-        function unhighlight(e) {
-            recordingArea.style.borderColor = '';
-            recordingArea.style.background = '';
-        }
-
-        recordingArea.addEventListener('drop', handleDrop, false);
-
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
             
-            if (files.length > 0) {
-                const file = files[0];
-                if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-                    handleFileUpload({ target: { files: [file] } });
-                } else {
-                    showToast('Please drop an image or video file', 'error');
-                }
-            }
-        }
-
-        // Canvas tools functionality
-        document.querySelectorAll('.canvas-tools button').forEach(button => {
-            button.addEventListener('click', function() {
-                document.querySelectorAll('.canvas-tools button').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
+            const formData = new FormData(this);
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = 'Creating...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                currentTour = {
+                    id: Date.now(),
+                    title: formData.get('title'),
+                    description: formData.get('description'),
+                    privacy: formData.get('privacy'),
+                    steps: [],
+                    created_at: new Date().toLocaleString()
+                };
                 
-                const toolName = this.title;
-                showToast(`${toolName} activated`, 'info');
-            });
+                showTourEditor();
+                saveTour();
+                
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Hide the form
+                document.getElementById('customTourForm').style.display = 'none';
+            }, 1000);
         });
+    }
+    
+    renderSavedTours();
+});
 
-        // Auto-save functionality
-        setInterval(() => {
-            if (tourData.steps.length > 0) {
-                localStorage.setItem('tourDraft', JSON.stringify(tourData));
-            }
-        }, 30000); // Auto-save every 30 seconds
+// Saved Tours Management
+function renderSavedTours() {
+    const container = document.getElementById('savedToursContainer');
+    const list = document.getElementById('savedToursList');
+    const tours = JSON.parse(localStorage.getItem('saved_tours') || '[]');
+    
+    if (tours.length > 0) {
+        container.style.display = 'block';
+        list.innerHTML = tours.map(tour => `
+            <div class="saved-item fade-in">
+                <div>
+                    <strong>${tour.title}</strong><br>
+                    <small class="text-muted">
+                        ${tour.description || 'No description'} • 
+                        ${tour.created_at} • 
+                        ${tour.privacy === 'private' ? 'Private' : 'Public'} • 
+                        ${tour.steps.length} steps
+                    </small>
+                </div>
+                <div class="saved-actions">
+                    <button class="btn btn-sm btn-primary" onclick="editTour(${tour.id})">Edit</button>
+                    <button class="btn btn-sm btn-success" onclick="previewSavedTour(${tour.id})">Preview</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteTour(${tour.id})">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+}
 
-        // Load draft on page load
-        window.addEventListener('load', function() {
-            const draft = localStorage.getItem('tourDraft');
-            if (draft) {
-                try {
-                    tourData = JSON.parse(draft);
-                    loadTour();
-                    showToast('Draft loaded automatically', 'info');
-                } catch (e) {
-                    console.error('Failed to load draft:', e);
-                }
+function editTour(id) {
+    const tours = JSON.parse(localStorage.getItem('saved_tours') || '[]');
+    const tour = tours.find(t => t.id === id);
+    if (tour) {
+        currentTour = { ...tour };
+        stepCounter = Math.max(...currentTour.steps.map(s => s.id), 0);
+        showTourEditor();
+    }
+}
+
+function previewSavedTour(id) {
+    const tours = JSON.parse(localStorage.getItem('saved_tours') || '[]');
+    const tour = tours.find(t => t.id === id);
+    if (tour) {
+        const info = `Preview: ${tour.title}\nSteps: ${tour.steps.length}\n\n${tour.steps.map((s, i) => `${i+1}. ${s.title}`).join('\n')}`;
+        alert(info);
+    }
+}
+
+function deleteTour(id) {
+    if (confirm('Delete this tour permanently?')) {
+        let tours = JSON.parse(localStorage.getItem('saved_tours') || '[]');
+        tours = tours.filter(t => t.id !== id);
+        localStorage.setItem('saved_tours', JSON.stringify(tours));
+        renderSavedTours();
+        alert('Tour deleted successfully!');
+    }
+}
+
+// Auto-load if coming from dashboard with parameters
+document.addEventListener('DOMContentLoaded', function() {
+    // Check URL parameters for auto-creation
+    const urlParams = new URLSearchParams(window.location.search);
+    const autoCreate = urlParams.get('create');
+    const tourType = urlParams.get('type');
+    
+    if (autoCreate === 'true') {
+        setTimeout(() => {
+            if (tourType === 'blank' || !tourType) {
+                createBlankTour();
+            } else {
+                createQuickTour(tourType);
             }
-        });
-    </script>
-</body>
-</html>
+        }, 500);
+    }
+    
+    // Load Font Awesome if not present
+    if (!document.querySelector('link[href*="font-awesome"]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+        document.head.appendChild(link);
+    }
+    
+    // Add smooth animations
+    const elements = document.querySelectorAll('.creation-hero, .card');
+    elements.forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            el.style.transition = 'all 0.6s ease-out';
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + S to save
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (currentTour.id) {
+            saveTour();
+        }
+    }
+    
+    // Ctrl/Cmd + Enter to add step
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        if (document.getElementById('tourEditorContainer').style.display !== 'none') {
+            addTourStep();
+        }
+    }
+});
+
+console.log('Streamlined Tour Creation page loaded successfully');
+</script>
+{% endblock %}

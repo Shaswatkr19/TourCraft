@@ -282,10 +282,7 @@
     background: linear-gradient(145deg, #ffffff, #f8fafc);
     border-radius: 12px;
     padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    margin-bottom: 1rem;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     border: 1px solid rgba(229, 231, 235, 0.5);
     transition: all 0.3s ease;
@@ -294,6 +291,19 @@
 .saved-item:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.tour-icon {
+    min-width: 50px;
+}
+
+.btn-group .btn {
+    margin-left: 0;
+    border-radius: 6px;
+}
+
+.btn-group .btn:not(:last-child) {
+    margin-right: 0.5rem;
 }
 
 .saved-actions button {
@@ -528,10 +538,26 @@
         </div>
     </div>
 
-    <!-- Saved Tours Section -->
-    <div class="saved-tours" id="savedToursContainer" style="display:none;">
-        <h3>Your Saved Tours</h3>
-        <div id="savedToursList"></div>
+    <!-- Saved Tours Section - Enhanced and More Prominent -->
+    <div class="row mb-4" id="savedToursSection">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4>Your Saved Tours</h4>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleSavedTours()">
+                        <i class="fas fa-eye" id="toggleIcon"></i> <span id="toggleText">Hide</span>
+                    </button>
+                </div>
+                <div class="card-body" id="savedToursContent">
+                    <div id="savedToursList">
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-folder-open fa-2x mb-2"></i>
+                            <p>No saved tours yet. Create your first tour above!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -837,32 +863,117 @@ document.addEventListener('DOMContentLoaded', function() {
     renderSavedTours();
 });
 
-// Saved Tours Management
+// Saved Tours Management - Enhanced
 function renderSavedTours() {
-    const container = document.getElementById('savedToursContainer');
     const list = document.getElementById('savedToursList');
+    const section = document.getElementById('savedToursSection');
     const tours = JSON.parse(localStorage.getItem('saved_tours') || '[]');
     
     if (tours.length > 0) {
-        container.style.display = 'block';
-        list.innerHTML = tours.map(tour => `
-            <div class="saved-item fade-in">
-                <div>
-                    <strong>${tour.title}</strong><br>
-                    <small class="text-muted">
-                        ${tour.description || 'No description'} • 
-                        ${tour.created_at} • 
-                        ${tour.privacy === 'private' ? 'Private' : 'Public'} • 
-                        ${tour.steps.length} steps
-                    </small>
-                </div>
-                <div class="saved-actions">
-                    <button class="btn btn-sm btn-primary" onclick="editTour(${tour.id})">Edit</button>
-                    <button class="btn btn-sm btn-success" onclick="previewSavedTour(${tour.id})">Preview</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteTour(${tour.id})">Delete</button>
+        section.style.display = 'block';
+        list.innerHTML = tours.map((tour, index) => `
+            <div class="saved-item fade-in" style="animation-delay: ${index * 0.1}s">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center">
+                            <div class="tour-icon me-3">
+                                <i class="fas fa-play-circle fa-2x text-primary"></i>
+                            </div>
+                            <div>
+                                <strong class="d-block">${tour.title}</strong>
+                                <small class="text-muted d-block">
+                                    ${tour.description || 'No description'}
+                                </small>
+                                <div class="mt-1">
+                                    <span class="badge bg-light text-dark me-1">
+                                        <i class="fas fa-calendar-alt"></i> ${tour.created_at}
+                                    </span>
+                                    <span class="badge ${tour.privacy === 'private' ? 'bg-warning' : 'bg-success'} me-1">
+                                        <i class="fas ${tour.privacy === 'private' ? 'fa-lock' : 'fa-globe'}"></i> 
+                                        ${tour.privacy === 'private' ? 'Private' : 'Public'}
+                                    </span>
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-list"></i> ${tour.steps.length} steps
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-primary" onclick="editTour(${tour.id})" title="Edit Tour">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" onclick="duplicateTour(${tour.id})" title="Duplicate Tour">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <button class="btn btn-sm btn-outline-info" onclick="previewSavedTour(${tour.id})" title="Preview Tour">
+                                <i class="fas fa-eye"></i> Preview
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTour(${tour.id})" title="Delete Tour">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         `).join('');
+    } else {
+        section.style.display = 'block';
+        list.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-folder-open fa-3x mb-3 opacity-50"></i>
+                <h6>No saved tours yet</h6>
+                <p>Create your first interactive tour using the quick start options above!</p>
+                <button class="btn btn-primary btn-sm" onclick="createBlankTour()">
+                    <i class="fas fa-plus"></i> Create Your First Tour
+                </button>
+            </div>
+        `;
+    }
+}
+
+function toggleSavedTours() {
+    const content = document.getElementById('savedToursContent');
+    const icon = document.getElementById('toggleIcon');
+    const text = document.getElementById('toggleText');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.className = 'fas fa-eye';
+        text.textContent = 'Hide';
+    } else {
+        content.style.display = 'none';
+        icon.className = 'fas fa-eye-slash';
+        text.textContent = 'Show';
+    }
+}
+
+function duplicateTour(id) {
+    const tours = JSON.parse(localStorage.getItem('saved_tours') || '[]');
+    const tour = tours.find(t => t.id === id);
+    if (tour) {
+        const duplicatedTour = {
+            ...tour,
+            id: Date.now(),
+            title: `${tour.title} (Copy)`,
+            created_at: new Date().toLocaleString()
+        };
+        
+        tours.push(duplicatedTour);
+        localStorage.setItem('saved_tours', JSON.stringify(tours));
+        renderSavedTours();
+        
+        // Show success message
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        btn.disabled = true;
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }, 1500);
     }
 }
 

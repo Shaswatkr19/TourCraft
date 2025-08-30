@@ -333,11 +333,12 @@
         </form>
 
         <div class="links">
-            <a href="{% url 'accounts:password_reset' %}">Forgot Password?</a>
-            <a href="{% url 'accounts:signup' %}">Create Account</a>
-            <a href="{% url 'pages:contact' %}">Contact Us</a>
-            <a href="{% url 'pages:about' %}">About Us</a>
+            <div class="links">
+                <a href="{% url 'accounts:password_reset' %}">Forgot Password?</a>
+                <a href="{% url 'accounts:signup' %}">Create Account</a>
+                <a href="{% url 'pages:contact' %}">Contact Us</a>
+                <a href="{% url 'pages:about' %}">About Us</a>
+            </div>
         </div>
-    </div>
-</body>
+    </body>
 </html>

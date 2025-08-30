@@ -110,13 +110,19 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Static files storage
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+
+# Email Configuration
 # Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_PASSWORD', default='')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -157,3 +163,11 @@ LOGGING = {
     },
 
 }    
+
+
+# Temporary debugging - add this
+print("Email User:", os.getenv('EMAIL_HOST_USER'))
+print("Email Password:", os.getenv('EMAIL_HOST_PASSWORD'))
+
+# Make sure DEFAULT_FROM_EMAIL is properly set
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')

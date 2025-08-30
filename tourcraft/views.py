@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 from django.contrib.auth import views as auth_views
 from django.core.mail import EmailMessage
+from django.conf import settings
 
 
 
@@ -70,43 +71,38 @@ def home_view(request):
 #     }
 #     return render(request, 'preview_enhanced_v2.html', context)
 
-# class PasswordResetView(auth_views.PasswordResetView):
-#     template_name = 'registration/password_reset_form.html'
-#     success_url = reverse_lazy('tourcraft:password_reset_done')  # namespace ke saath
-#     email_template_name = 'registration/password_reset_email.html'
+class PasswordResetView(auth_views.PasswordResetView):
+    template_name = 'registration/password_reset_form.html'
+    success_url = reverse_lazy('tourcraft:password_reset_done')
+    email_template_name = 'registration/password_reset_email.html'
 
-#     def form_valid(self, form):
-#         # user email
-#         email = form.cleaned_data["email"]
+    def form_valid(self, form):
+        try:
+            form.save(
+                from_email=settings.DEFAULT_FROM_EMAIL,  # <- important
+                request=self.request,
+                email_template_name=self.email_template_name,
+            )
+            messages.success(self.request, "✅ Reset email sent successfully! Check your inbox.")
+        except Exception as e:
+            messages.error(self.request, "❌ Failed to send reset email. Please try again.")
+            print("Password reset mail error:", e)
 
-#         # custom email content (optional override)
-#         subject = "🔑 Password Reset Request - TourCraft"
-#         body = "Hello,\n\nPlease click the link to reset your password.\n\nThanks!"
-#         from_email = 'TourCraft <shaswatsinha05@gmail.com>'  # fixed sender email
+        return super(auth_views.PasswordResetView, self).form_valid(form)
 
-#         msg = EmailMessage(subject, body, from_email, [email])
-#         try:
-#             msg.send(fail_silently=False)
-#             messages.success(self.request, "✅ Reset email sent successfully! Check your inbox.")
-#         except Exception as e:
-#             messages.error(self.request, "❌ Failed to send reset email. Please try again.")
-#             print("Password reset mail error:", e)
-
-#         return super().form_valid(form)
-
-#     def form_invalid(self, form):
-#         messages.error(self.request, "❌ Invalid form submission. Please try again.")
-#         return super().form_invalid(form)
+    def form_invalid(self, form):
+        messages.error(self.request, "❌ Invalid form submission. Please try again.")
+        return super().form_invalid(form)
 
 
-# class PasswordResetDoneView(auth_views.PasswordResetDoneView):
-#     template_name = 'registration/password_reset_done.html'
+class PasswordResetDoneView(auth_views.PasswordResetDoneView):
+    template_name = 'registration/password_reset_done.html'
 
 
-# class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
-#     template_name = 'registration/password_reset_confirm.html'
-#     success_url = reverse_lazy('tourcraft:password_reset_complete')
+class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    template_name = 'registration/password_reset_confirm.html'
+    success_url = reverse_lazy('tourcraft:password_reset_complete')
 
 
-# class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
-#     template_name = 'registration/password_reset_complete.html'
+class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
+    template_name = 'registration/password_reset_complete.html'

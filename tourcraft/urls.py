@@ -12,7 +12,11 @@ urlpatterns = [
     path('tours/', include(('tours.urls', 'tours'), namespace='tours')),
     path('', include('django.contrib.auth.urls')),  # Login/logout URLs
 
-    path('password-reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    # path('password-reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    # path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+    # path('password-reset-confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    # path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+
 
     path('login/', account_views.login_view, name='login'),
     
